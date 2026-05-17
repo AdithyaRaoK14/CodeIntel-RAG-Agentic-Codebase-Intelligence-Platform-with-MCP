@@ -179,7 +179,7 @@ ollama pull llama3.2:3b
 ### Option A — Docker (recommended)
 
 ```bash
-git clone https://github.com/your-username/codeintel-rag.git
+https://github.com/AdithyaRaoK14/CodeIntel-RAG-Agentic-Code-Intelligence-Platform.git
 cd codeintel-rag
 
 docker compose up --build
