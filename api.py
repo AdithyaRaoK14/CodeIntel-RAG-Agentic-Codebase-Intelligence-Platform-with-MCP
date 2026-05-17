@@ -16,6 +16,7 @@ Changes (v3)
 """
 
 from __future__ import annotations
+from agent_router import agent_router
 from vulnerability_scanner import scan_chunks, scan_summary
 from visualization.call_graph import (
     build_call_graph, draw_call_graph, draw_call_graph_interactive,
@@ -176,28 +177,34 @@ def _validate_github_url(url: str) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 
 SECURITY_WORDS = {
-    "unsafe", "vulnerable", "vulnerability", "injection",
-    "eval", "hardcoded", "exploit", "dangerous",
-    "insecure", "weakness", "malicious",
+    "unsafe", "vulnerable", "vulnerability", "vulnerabilities",
+    "injection", "eval", "exec", "hardcoded", "exploit",
+    "dangerous", "insecure", "weakness", "malicious",
+    "security", "secure",
 }
 
 # Maps query keywords → terms to search across all finding fields.
 # None means show all findings (no filtering).
 KEYWORD_FILTERS: dict[str, list[str] | None] = {
-    "hardcoded":  ["hardcoded", "password", "secret", "credential"],
-    "injection":  ["injection", "sql", "inject",
-                   "unsanitized", "user input", "query"],
-    "eval":       ["eval", "literal_eval", "exec",
-                   "code execution", "arbitrary"],
-    "dangerous":  ["dangerous", "insecure", "unsafe", "risky"],
-    "insecure":   ["insecure", "weak", "deprecated", "unsafe"],
-    "exploit":    ["exploit", "arbitrary", "remote", "rce"],
-    "malicious":  ["malicious", "backdoor", "trojan"],
-    "weakness":   ["weakness", "weak", "cwe"],
-    # These show all findings — no filtering
-    "unsafe":     None,
-    "vulnerable":  None,
-    "vulnerability": None,
+    "hardcoded":       ["hardcoded", "password", "secret", "credential"],
+    "injection":       ["injection", "sql", "inject",
+                        "unsanitized", "user input", "query"],
+    "eval":            ["eval", "literal_eval", "exec",
+                        "code execution", "arbitrary"],
+    "exec":            ["exec", "code execution", "arbitrary"],
+    "exploit":         ["exploit", "arbitrary", "remote", "rce"],
+    "malicious":       ["malicious", "backdoor", "trojan"],
+    "weakness":        ["weakness", "weak", "cwe"],
+    "secure":          ["hash", "sha", "md5", "weak", "crypto",
+                        "cipher", "ssl", "tls", "cert"],
+    # General queries — show all findings, no filtering
+    "unsafe":          None,
+    "vulnerable":      None,
+    "vulnerability":   None,
+    "vulnerabilities": None,
+    "dangerous":       None,
+    "insecure":        None,
+    "security":        None,
 }
 
 
@@ -221,7 +228,7 @@ def _filter_findings(findings: list[dict], query_words: set[str]) -> tuple[list[
                 t in (
                     f.get("description", "") + " " +
                     f.get("function",    "") + " " +
-                    f.get("category",    "") + " " +
+                    f.get("cwe_name",    "") + " " +
                     f.get("file",        "")
                 ).lower()
                 for t in terms
@@ -260,6 +267,7 @@ app = FastAPI(
     version="3.0",
     lifespan=lifespan,
 )
+app.include_router(agent_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -543,6 +551,24 @@ async def chat(req: ChatRequest, state: AppState = Depends(get_state)):
     if query_words & SECURITY_WORDS:
         all_findings = scan_chunks(state.chunks, repo_path=state.repo)
         findings, matched_kw = _filter_findings(all_findings, query_words)
+
+        # ── File-specific filtering ───────────────────────────────────────────
+        # If the query mentions a filename (e.g. "in sessions.py"), narrow
+        # findings to only that file.
+        file_filter = next(
+            (w for w in query_words if w.endswith("py") or w.endswith("js")
+             or w.endswith("ts") or w.endswith("java") or w.endswith("cpp")),
+            None,
+        )
+        if file_filter:
+            file_findings = [
+                f for f in findings
+                if file_filter in os.path.basename(f.get("file", "")).lower()
+            ]
+            # Only apply if it actually narrows results, otherwise keep all
+            if file_findings:
+                findings = file_findings
+        # ── end file filtering ────────────────────────────────────────────────
 
         if not all_findings:
             answer = "✅ No security vulnerabilities detected by the scanner."
