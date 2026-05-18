@@ -8,7 +8,6 @@
 
 ![CodeIntel UI](docs/screenshot.png)
 
-> *To add your own screenshot: save it as `docs/screenshot.png` in the repo root and push.*
 
 ---
 
