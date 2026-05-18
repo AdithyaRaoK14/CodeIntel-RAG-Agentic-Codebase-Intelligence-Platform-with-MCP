@@ -17,6 +17,8 @@ Changes (v3)
 
 from __future__ import annotations
 from agent_router import agent_router
+from mcp_server.server import mcp
+from mcp_server.mcp_router import mcp_chat_router
 from vulnerability_scanner import scan_chunks, scan_summary
 from visualization.call_graph import (
     build_call_graph, draw_call_graph, draw_call_graph_interactive,
@@ -268,6 +270,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.include_router(agent_router)
+app.mount("/mcp", mcp.sse_app())
+app.include_router(mcp_chat_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -697,8 +701,7 @@ def export_report(request: Request, state: AppState = Depends(get_state)):
             self.calls = calls
             self.calls_str = ", ".join(calls)
 
-    return templates.TemplateResponse("report.html", {
-        "request":       request,
+    return templates.TemplateResponse(request, "report.html", {
         "repo":          state.repo,
         "now":           now,
         "num_functions": len(state.chunks),
