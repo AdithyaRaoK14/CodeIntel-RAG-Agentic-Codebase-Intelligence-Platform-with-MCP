@@ -9,362 +9,229 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg:       #0d0f14;
-  --surface:  #13161e;
-  --surface2: #1a1d28;
-  --border:   #1f2433;
-  --accent:   #f97316;
-  --blue:     #3b82f6;
-  --green:    #22c55e;
-  --red:      #ef4444;
-  --yellow:   #eab308;
-  --text:     #e2e8f0;
-  --muted:    #64748b;
-  --radius:   6px;
+  --bg:#0d0f14; --surface:#13161e; --surface2:#1a1d28; --border:#1f2433;
+  --accent:#f97316; --blue:#3b82f6; --green:#22c55e; --red:#ef4444;
+  --yellow:#eab308; --purple:#a855f7; --teal:#14b8a6;
+  --text:#e2e8f0; --muted:#64748b; --radius:6px;
 }
-
-html, body { height: 100%; background: var(--bg); color: var(--text);
-  font-family: 'JetBrains Mono', monospace; font-size: 13px; overflow: hidden; }
-
-/* ── Shell ── */
-.shell {
-  display: grid;
-  grid-template-columns: 200px 260px 1fr;
-  grid-template-rows: 48px 1fr;
-  height: 100vh;
-}
-
-/* ── Topbar ── */
-.topbar {
-  grid-column: 1 / -1;
-  display: flex; align-items: center; gap: 10px;
-  padding: 0 18px;
-  background: var(--surface); border-bottom: 1px solid var(--border); z-index: 10;
-}
-.logo { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; }
-.logo span { color: var(--accent); }
-.topbar-sep { flex: 1; }
-.pill { display: flex; align-items: center; gap: 5px; padding: 4px 10px;
-  border-radius: 20px; background: var(--border); font-size: 11px; color: var(--muted); }
-.pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
-.pill.ok .dot { background: var(--green); }
-.pill.ok { color: var(--green); }
-
-/* ── Sessions sidebar ── */
-.sessions {
-  background: #0a0c11;
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; overflow: hidden;
-}
-.sessions-top { padding: 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.new-chat-btn {
-  width: 100%; padding: 8px 12px;
-  background: var(--accent); color: #000;
-  border: none; border-radius: var(--radius);
-  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
-  cursor: pointer; transition: opacity .15s;
-  display: flex; align-items: center; gap: 6px; justify-content: center;
-}
-.new-chat-btn:hover { opacity: .85; }
-.sessions-list { flex: 1; overflow-y: auto; padding: 8px 6px; }
-.sessions-list::-webkit-scrollbar { width: 3px; }
-.sessions-list::-webkit-scrollbar-thumb { background: var(--border); }
-.session-group-label {
-  font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
-  text-transform: uppercase; color: var(--muted); padding: 8px 8px 4px;
-}
-.session-item {
-  padding: 9px 10px; border-radius: var(--radius); cursor: pointer;
-  transition: background .12s; margin-bottom: 2px; position: relative;
-  display: flex; align-items: center; gap: 6px;
-}
-.session-item:hover { background: var(--surface); }
-.session-item.active { background: rgba(249,115,22,.12); border: 1px solid rgba(249,115,22,.2); }
-.session-item.active .s-title { color: var(--accent); }
-.s-title { font-size: 11px; color: var(--text); white-space: nowrap; overflow: hidden;
-  text-overflow: ellipsis; flex: 1; min-width: 0; }
-.del-btn {
-  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-  background: none; border: none; color: var(--muted); font-size: 13px;
-  cursor: pointer; padding: 2px 4px; display: none; border-radius: 3px; transition: color .12s;
-}
-.session-item:hover .del-btn { display: block; }
-.del-btn:hover { color: var(--red); }
-.sessions-empty { padding: 20px 12px; text-align: center; color: var(--muted); font-size: 11px; line-height: 1.6; }
-
-/* ── Repo sidebar ── */
-.sidebar {
-  background: var(--surface); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; overflow-y: auto;
-}
-.sidebar::-webkit-scrollbar { width: 3px; }
-.sidebar::-webkit-scrollbar-thumb { background: var(--border); }
-.s-section { padding: 13px 14px; border-bottom: 1px solid var(--border); }
-.s-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 9px; }
-.s-input { width: 100%; background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius); color: var(--text); font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; padding: 7px 10px; outline: none; transition: border-color .15s; }
-.s-input:focus { border-color: var(--accent); }
-.s-btn { margin-top: 7px; width: 100%; padding: 7px; border: none; border-radius: var(--radius);
-  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
-  cursor: pointer; transition: opacity .15s; }
-.s-btn.primary { background: var(--accent); color: #000; }
-.s-btn.secondary { background: var(--border); color: var(--text); }
-.s-btn:hover { opacity: .85; }
-.s-btn:disabled { opacity: .4; cursor: not-allowed; }
-.upload-zone { border: 2px dashed var(--border); border-radius: var(--radius);
-  padding: 12px; text-align: center; cursor: pointer; transition: all .15s;
-  color: var(--muted); font-size: 11px; }
-.upload-zone:hover, .upload-zone.drag { border-color: var(--accent); color: var(--accent); background: rgba(249,115,22,.04); }
-.upload-zone input { display: none; }
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.stat-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 9px 10px; }
-.stat-num { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--accent); }
-.stat-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
-.quick-list { display: flex; flex-direction: column; gap: 4px; }
-.quick-btn { background: none; border: 1px solid var(--border); border-radius: var(--radius);
-  color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 11px;
-  padding: 7px 10px; text-align: left; cursor: pointer; transition: all .15s; }
-.quick-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(249,115,22,.05); }
-
-/* ── Main ── */
-.main { display: flex; flex-direction: column; overflow: hidden; }
-.tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
-.tab { padding: 10px 20px; font-size: 12px; color: var(--muted); cursor: pointer;
-  border-bottom: 2px solid transparent; transition: all .15s; user-select: none; }
-.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-.tab-panel { flex: 1; overflow: hidden; display: none; flex-direction: column; }
-.tab-panel.active { display: flex; }
-
-/* ── Messages ── */
-.messages { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 18px; }
-.messages::-webkit-scrollbar { width: 4px; }
-.messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-.msg { display: flex; flex-direction: column; gap: 5px; max-width: 860px; }
-.msg.user { align-self: flex-end; align-items: flex-end; }
-.msg.bot  { align-self: flex-start; }
-.msg-role { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
-.msg.user .msg-role { color: var(--accent); }
-.bubble { padding: 12px 16px; border-radius: var(--radius); line-height: 1.65; font-size: 13px; }
-.msg.user .bubble { background: rgba(249,115,22,.1); border: 1px solid rgba(249,115,22,.22); }
-.msg.bot  .bubble { background: var(--surface); border: 1px solid var(--border); }
-
-/* ── Typewriter cursor ── */
-.typewriter-cursor {
-  display: inline-block; width: 2px; height: 13px;
-  background: var(--accent); margin-left: 2px; vertical-align: middle;
-  animation: cursor-blink .6s infinite;
-}
-@keyframes cursor-blink {
-  0%,49% { opacity: 1; }
-  50%,100% { opacity: 0; }
-}
-
-.chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-.chip { display: flex; align-items: center; gap: 5px; padding: 4px 10px;
-  background: var(--bg); border: 1px solid var(--border); border-radius: 20px; font-size: 11px; }
-.chip .fn { color: var(--blue); font-weight: 500; }
-.chip .fi { color: var(--muted); }
-
-.callers { margin-top: 6px; font-size: 11px; color: var(--muted); }
-.callers span { color: var(--green); }
-
-.code-block { margin-top: 10px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
-.code-hdr { display: flex; align-items: center; justify-content: space-between;
-  padding: 5px 12px; background: rgba(255,255,255,.03); border-bottom: 1px solid var(--border); }
-.code-lang { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-.code-body { margin: 0; max-height: 220px; overflow-y: auto; font-size: 12px; }
-.code-body code { display: block; padding: 12px !important; background: #1a1b26 !important; }
-
-.graph-wrap { margin-top: 10px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-.graph-hdr { display: flex; align-items: center; justify-content: space-between;
-  padding: 5px 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
-  color: var(--muted); background: rgba(255,255,255,.03); border-bottom: 1px solid var(--border); }
-.graph-wrap img { display: block; width: 100%; }
-
-/* ── Interactive graph button ── */
-.graph-btn {
-  background: none; border: 1px solid var(--border); border-radius: var(--radius);
-  color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 10px;
-  padding: 3px 9px; cursor: pointer; transition: all .15s;
-}
-.graph-btn:hover { border-color: var(--blue); color: var(--blue); }
-
-/* ── Interactive graph modal ── */
-#graphModal {
-  display: none;
-  position: fixed; inset: 0; z-index: 1000;
-  background: rgba(0,0,0,.75);
-  align-items: center; justify-content: center;
-}
-#graphModal.open { display: flex; }
-.graph-modal-box {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 10px; overflow: hidden;
-  width: 85vw; height: 75vh;
-  display: flex; flex-direction: column;
-}
-.graph-modal-hdr {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 16px; border-bottom: 1px solid var(--border);
-  font-size: 11px; font-weight: 700; color: var(--muted);
-}
-.graph-modal-close {
-  background: none; border: none; color: var(--muted); font-size: 18px;
-  cursor: pointer; line-height: 1; transition: color .12s;
-}
-.graph-modal-close:hover { color: var(--red); }
-#graphFrame {
-  flex: 1; border: none; background: #1E1E2E;
-}
-.graph-loading {
-  flex: 1; display: flex; align-items: center; justify-content: center;
-  color: var(--muted); font-size: 12px;
-}
-
-/* ── Typing indicator ── */
-.typing { display: flex; align-items: center; gap: 5px; padding: 4px 0; }
-.typing span { width: 6px; height: 6px; background: var(--muted); border-radius: 50%;
-  animation: blink 1.2s infinite; }
-.typing span:nth-child(2) { animation-delay: .2s; }
-.typing span:nth-child(3) { animation-delay: .4s; }
-@keyframes blink {
-  0%,80%,100% { opacity:.2; transform:scale(.8); }
-  40%         { opacity:1;  transform:scale(1.1); }
-}
-
-.welcome { margin: auto; text-align: center; color: var(--muted); padding: 40px; }
-.welcome-icon { font-size: 40px; margin-bottom: 16px; }
-.welcome h2 { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:var(--text); margin-bottom:8px; }
-.welcome p { font-size:12px; line-height:1.7; max-width:320px; }
-
-.input-bar { padding: 14px 24px; background: var(--surface); border-top: 1px solid var(--border);
-  display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
-.input-wrap { flex: 1; background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius); display: flex; align-items: center; padding: 9px 14px; gap: 8px;
-  transition: border-color .15s; }
-.input-wrap:focus-within { border-color: var(--accent); }
-.input-prompt { color: var(--accent); font-weight: 700; user-select: none; }
-#queryInput { flex:1; background:none; border:none; outline:none; color:var(--text);
-  font-family:'JetBrains Mono',monospace; font-size:13px; caret-color:var(--accent); }
-#queryInput::placeholder { color: var(--muted); }
-.send-btn { padding:9px 18px; background:var(--accent); color:#000; border:none;
-  border-radius:var(--radius); font-family:'JetBrains Mono',monospace; font-size:12px;
-  font-weight:700; cursor:pointer; transition:opacity .15s; white-space:nowrap; }
-.send-btn:hover { opacity:.85; }
-.send-btn:disabled { opacity:.4; cursor:not-allowed; }
-
-/* ── Vuln tab ── */
-.vuln-panel { flex:1; overflow-y:auto; padding:20px 24px; }
-.vuln-panel::-webkit-scrollbar { width:4px; }
-.vuln-panel::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
-.vuln-summary { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
-.vuln-stat { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-  padding:10px 16px; min-width:90px; text-align:center; }
-.vuln-stat .n { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; }
-.vuln-stat .l { font-size:10px; color:var(--muted); margin-top:3px; text-transform:uppercase; letter-spacing:1px; }
-.vuln-item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-  padding:12px 16px; margin-bottom:8px; display:flex; gap:12px; align-items:flex-start; }
-.vuln-badge { padding:3px 10px; border-radius:12px; font-size:10px; font-weight:700;
-  color:#000; white-space:nowrap; flex-shrink:0; margin-top:2px; }
-.vuln-info { flex:1; }
-.vuln-fn { font-size:13px; color:var(--text); font-weight:500; }
-.vuln-file { font-size:11px; color:var(--muted); margin-top:2px; }
-.vuln-desc { font-size:12px; color:var(--text); margin-top:5px; }
-.vuln-code { font-size:11px; color:var(--muted); margin-top:4px; }
-.vuln-src  { font-size:10px; color:var(--blue); margin-top:3px; }
-.vuln-empty { text-align:center; color:var(--green); padding:40px; font-size:13px; }
-.scan-btn { background:var(--accent); color:#000; border:none; border-radius:var(--radius);
-  font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700;
-  padding:9px 18px; cursor:pointer; transition:opacity .15s; margin-right:10px; }
-.scan-btn:hover { opacity:.85; }
-.export-btn { background:none; border:1px solid var(--border); border-radius:var(--radius);
-  color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:12px;
-  padding:9px 14px; cursor:pointer; transition:all .15s; }
-.export-btn:hover { border-color:var(--blue); color:var(--blue); }
-.scan-row { margin-bottom:16px; }
-
-/* ── Voice ── */
-.mic-btn {
-  background: none; border: 1px solid var(--border); border-radius: var(--radius);
-  color: var(--muted); font-size: 15px; padding: 8px 11px; cursor: pointer;
-  transition: all .15s; line-height: 1; flex-shrink: 0;
-}
-.mic-btn:hover  { border-color: var(--accent); color: var(--accent); }
-.mic-btn.active { border-color: var(--red); color: var(--red); animation: pulse 1s infinite; }
-@keyframes pulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
-  50%      { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
-}
-.speak-btn {
-  background: none; border: none; color: var(--muted); font-size: 13px;
-  cursor: pointer; padding: 2px 5px; border-radius: 4px; transition: color .12s;
-  margin-left: 6px; vertical-align: middle;
-}
-.speak-btn:hover  { color: var(--blue); }
-.speak-btn.active { color: var(--green); }
-
-/* ── Agent mode toggle ── */
-.mode-toggle {
-  display: flex; align-items: center; gap: 0;
-  background: var(--border); border-radius: var(--radius);
-  overflow: hidden; flex-shrink: 0;
-}
-.mode-btn {
-  padding: 7px 13px; border: none; font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; font-weight: 700; cursor: pointer; transition: all .15s;
-  background: transparent; color: var(--muted);
-}
-.mode-btn.active { background: var(--accent); color: #000; }
-.mode-btn:not(.active):hover { color: var(--text); }
-
-/* ── Agent response ── */
-.agent-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.25);
-  border-radius: 20px; padding: 3px 10px; font-size: 10px;
-  color: var(--blue); font-weight: 700; margin-bottom: 8px;
-}
-.agent-tools {
-  display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px;
-}
-.agent-tool-chip {
-  padding: 3px 9px; background: rgba(59,130,246,.08);
-  border: 1px solid rgba(59,130,246,.2); border-radius: 20px;
-  font-size: 10px; color: var(--blue);
-}
-.agent-steps {
-  margin-top: 10px; border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden;
-}
-.agent-steps-hdr {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 6px 12px; background: rgba(255,255,255,.03);
-  border-bottom: 1px solid var(--border); font-size: 10px;
-  text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
-  cursor: pointer; user-select: none;
-}
-.agent-steps-hdr:hover { color: var(--text); }
-.agent-steps-body { display: none; }
-.agent-steps-body.open { display: block; }
-.agent-step {
-  padding: 8px 12px; border-bottom: 1px solid var(--border);
-  font-size: 11px;
-}
-.agent-step:last-child { border-bottom: none; }
-.agent-step-tool { color: var(--blue); font-weight: 700; margin-bottom: 3px; }
-.agent-step-input { color: var(--muted); font-size: 10px; margin-bottom: 4px; word-break: break-all; }
-.agent-step-obs { color: var(--text); font-size: 11px; white-space: pre-wrap;
-  max-height: 120px; overflow-y: auto; line-height: 1.5; }
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;overflow:hidden;}
+.shell{display:grid;grid-template-columns:200px 264px 1fr;grid-template-rows:48px 1fr;height:100vh;}
+.topbar{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:0 18px;background:linear-gradient(90deg,#0d0f14 0%,#13161e 100%);border-bottom:1px solid var(--border);z-index:10;}
+.logo{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;background:linear-gradient(135deg,#f97316 0%,#fb923c 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-bracket{-webkit-text-fill-color:var(--muted);color:var(--muted);}
+.topbar-sep{flex:1;}
+.pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:var(--border);font-size:11px;color:var(--muted);}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);}
+.pill.ok .dot{background:var(--green);}
+.pill.ok{color:var(--green);}
+.wake-toggle{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;background:var(--border);border:1px solid var(--border);font-size:11px;color:var(--muted);cursor:pointer;transition:all .2s;user-select:none;}
+.wake-toggle:hover{border-color:var(--purple);color:var(--purple);}
+.wake-toggle.active{background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.4);color:var(--purple);}
+.wake-toggle .wake-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);}
+.wake-toggle.active .wake-dot{background:var(--purple);animation:pulse-wake 1.5s infinite;}
+@keyframes pulse-wake{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,.5);}50%{box-shadow:0 0 0 5px rgba(168,85,247,0);}}
+.sessions{background:#0a0c11;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.sessions-top{padding:12px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.new-chat-btn{width:100%;padding:8px 12px;background:var(--accent);color:#000;border:none;border-radius:var(--radius);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;gap:6px;justify-content:center;}
+.new-chat-btn:hover{opacity:.85;}
+.sessions-list{flex:1;overflow-y:auto;padding:8px 6px;}
+.sessions-list::-webkit-scrollbar{width:3px;}
+.sessions-list::-webkit-scrollbar-thumb{background:var(--border);}
+.session-group-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);padding:8px 8px 4px;}
+.session-item{padding:9px 10px;border-radius:var(--radius);cursor:pointer;transition:background .12s;margin-bottom:2px;position:relative;display:flex;align-items:center;gap:6px;}
+.session-item:hover{background:var(--surface);}
+.session-item.active{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.18);}
+.session-item.active .s-title{color:var(--accent);}
+.s-mode-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;background:var(--muted);}
+.s-mode-dot.agent{background:var(--blue);}
+.s-mode-dot.mcp{background:var(--purple);}
+.s-title{font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;}
+.del-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:2px 4px;display:none;border-radius:3px;transition:color .12s;}
+.session-item:hover .del-btn{display:block;}
+.del-btn:hover{color:var(--red);}
+.sessions-empty{padding:20px 12px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6;}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);}
+.s-section{padding:13px 14px;border-bottom:1px solid var(--border);}
+.s-section.collapsible{padding-bottom:0;}
+.s-section-body{padding-bottom:13px;}
+.s-section-body.collapsed{display:none;}
+.s-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:9px;display:flex;align-items:center;justify-content:space-between;}
+.s-label-toggle{cursor:pointer;}
+.s-label-toggle:hover{color:var(--text);}
+.s-label-caret{font-size:9px;transition:transform .15s;}
+.s-label-caret.open{transform:rotate(90deg);}
+.s-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:7px 10px;outline:none;transition:border-color .15s;}
+.s-input:focus{border-color:var(--accent);}
+.s-btn{margin-top:7px;width:100%;padding:7px;border:none;border-radius:var(--radius);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;transition:opacity .15s;}
+.s-btn.primary{background:var(--accent);color:#000;}
+.s-btn.secondary{background:var(--border);color:var(--text);}
+.s-btn.purple{background:var(--purple);color:#fff;}
+.s-btn:hover{opacity:.85;}
+.s-btn:disabled{opacity:.4;cursor:not-allowed;}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:12px;text-align:center;cursor:pointer;transition:all .15s;color:var(--muted);font-size:11px;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);color:var(--accent);background:rgba(249,115,22,.04);}
+.upload-zone input{display:none;}
+.paste-textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:8px 10px;outline:none;resize:vertical;transition:border-color .15s;min-height:90px;line-height:1.5;}
+.paste-textarea:focus{border-color:var(--purple);}
+.paste-row{display:flex;gap:6px;margin-top:6px;}
+.paste-filename{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 8px;outline:none;min-width:0;}
+.paste-filename:focus{border-color:var(--purple);}
+.paste-submit{padding:6px 12px;border:none;border-radius:var(--radius);background:var(--purple);color:#fff;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;transition:opacity .15s;flex-shrink:0;}
+.paste-submit:hover{opacity:.85;}
+.paste-hint{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.5;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.stat-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:9px 10px;}
+.stat-num{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--accent);}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+.quick-list{display:flex;flex-direction:column;gap:4px;}
+.quick-btn{background:none;border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;padding:7px 10px;text-align:left;cursor:pointer;transition:all .15s;}
+.quick-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(249,115,22,.05);}
+.main{display:flex;flex-direction:column;overflow:hidden;}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.tab{padding:10px 20px;font-size:12px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;user-select:none;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-panel{flex:1;overflow:hidden;display:none;flex-direction:column;}
+.tab-panel.active{display:flex;}
+.messages{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:18px;}
+.messages::-webkit-scrollbar{width:4px;}
+.messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.msg{display:flex;flex-direction:column;gap:5px;max-width:880px;}
+.msg.user{align-self:flex-end;align-items:flex-end;}
+.msg.bot{align-self:flex-start;}
+.msg-role{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.msg.user .msg-role{color:var(--accent);}
+.bubble{padding:13px 16px;border-radius:var(--radius);line-height:1.7;font-size:13px;border-left:3px solid transparent;}
+.msg.user .bubble{background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);border-left-color:var(--accent);}
+.msg.bot .bubble{background:var(--surface);border:1px solid var(--border);border-left-color:var(--border);}
+.msg.bot.agent-msg .bubble{border-left-color:var(--blue);}
+.msg.bot.mcp-msg .bubble{border-left-color:var(--purple);}
+.typewriter-cursor{display:inline-block;width:2px;height:13px;background:var(--accent);margin-left:2px;vertical-align:middle;animation:cursor-blink .6s infinite;}
+@keyframes cursor-blink{0%,49%{opacity:1;}50%,100%{opacity:0;}}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.chip{display:flex;align-items:center;gap:5px;padding:4px 10px;background:var(--bg);border:1px solid var(--border);border-radius:20px;font-size:11px;}
+.chip .fn{color:var(--blue);font-weight:500;}
+.chip .fi{color:var(--muted);}
+.callers{margin-top:6px;font-size:11px;color:var(--muted);}
+.callers span{color:var(--green);}
+.code-block{margin-top:10px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);}
+.code-hdr{display:flex;align-items:center;justify-content:space-between;padding:5px 12px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);}
+.code-lang{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.code-body{margin:0;max-height:220px;overflow-y:auto;font-size:12px;}
+.code-body code{display:block;padding:12px !important;background:#1a1b26 !important;}
+.graph-wrap{margin-top:10px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.graph-hdr{display:flex;align-items:center;justify-content:space-between;padding:5px 12px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);}
+.graph-wrap img{display:block;width:100%;}
+.graph-btn{background:none;border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 9px;cursor:pointer;transition:all .15s;}
+.graph-btn:hover{border-color:var(--blue);color:var(--blue);}
+#graphModal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.75);align-items:center;justify-content:center;}
+#graphModal.open{display:flex;}
+.graph-modal-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;width:85vw;height:75vh;display:flex;flex-direction:column;}
+.graph-modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--muted);}
+.graph-modal-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;transition:color .12s;}
+.graph-modal-close:hover{color:var(--red);}
+#graphFrame{flex:1;border:none;background:#1E1E2E;}
+.typing{display:flex;align-items:center;gap:5px;padding:4px 0;}
+.typing span{width:6px;height:6px;background:var(--muted);border-radius:50%;animation:blink 1.2s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;}
+.typing span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.2;transform:scale(.8);}40%{opacity:1;transform:scale(1.1);}}
+.welcome{margin:auto;text-align:center;color:var(--muted);padding:40px;}
+.welcome-icon{font-size:40px;margin-bottom:16px;}
+.welcome h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px;}
+.welcome p{font-size:12px;line-height:1.7;max-width:340px;margin:0 auto;}
+.welcome-modes{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap;}
+.welcome-mode{padding:5px 12px;border-radius:20px;font-size:11px;border:1px solid var(--border);}
+.welcome-mode.chat{color:var(--accent);border-color:rgba(249,115,22,.3);}
+.welcome-mode.agent{color:var(--blue);border-color:rgba(59,130,246,.3);}
+.welcome-mode.mcp{color:var(--purple);border-color:rgba(168,85,247,.3);}
+.input-bar{padding:12px 20px;background:var(--surface);border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.input-wrap{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);display:flex;align-items:center;padding:9px 14px;gap:8px;transition:border-color .2s;}
+.input-wrap:focus-within{border-color:var(--accent);}
+.input-prompt{color:var(--accent);font-weight:700;user-select:none;font-size:14px;}
+#queryInput{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;caret-color:var(--accent);}
+#queryInput::placeholder{color:var(--muted);}
+.send-btn{padding:9px 18px;background:var(--accent);color:#000;border:none;border-radius:var(--radius);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.send-btn:hover{opacity:.85;}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;}
+.mode-toggle{display:flex;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;flex-shrink:0;}
+.mode-btn{padding:7px 11px;border:none;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;background:transparent;color:var(--muted);white-space:nowrap;border-right:1px solid var(--border);}
+.mode-btn:last-child{border-right:none;}
+.mode-btn.active-chat{background:rgba(249,115,22,.15);color:var(--accent);}
+.mode-btn.active-agent{background:rgba(59,130,246,.15);color:var(--blue);}
+.mode-btn.active-mcp{background:rgba(168,85,247,.15);color:var(--purple);}
+.mode-btn:not([class*='active']):hover{color:var(--text);}
+.vuln-panel{flex:1;overflow-y:auto;padding:20px 24px;}
+.vuln-panel::-webkit-scrollbar{width:4px;}
+.vuln-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.vuln-summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.vuln-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;min-width:90px;text-align:center;}
+.vuln-stat .n{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;}
+.vuln-stat .l{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:1px;}
+.vuln-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;transition:border-color .15s;}
+.vuln-item:hover{border-color:rgba(249,115,22,.25);}
+.vuln-badge{padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;color:#000;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.vuln-info{flex:1;}
+.vuln-fn{font-size:13px;color:var(--text);font-weight:500;}
+.vuln-file{font-size:11px;color:var(--muted);margin-top:2px;}
+.vuln-desc{font-size:12px;color:var(--text);margin-top:5px;}
+.vuln-code{font-size:11px;color:var(--muted);margin-top:4px;}
+.vuln-src{font-size:10px;color:var(--blue);margin-top:3px;}
+.vuln-empty{text-align:center;color:var(--green);padding:40px;font-size:13px;}
+.scan-btn{background:var(--accent);color:#000;border:none;border-radius:var(--radius);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;padding:9px 18px;cursor:pointer;transition:opacity .15s;margin-right:10px;}
+.scan-btn:hover{opacity:.85;}
+.export-btn{background:none;border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px;padding:9px 14px;cursor:pointer;transition:all .15s;}
+.export-btn:hover{border-color:var(--blue);color:var(--blue);}
+.scan-row{margin-bottom:16px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
+.mic-btn{background:none;border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);font-size:15px;padding:8px 11px;cursor:pointer;transition:all .15s;line-height:1;flex-shrink:0;}
+.mic-btn:hover{border-color:var(--accent);color:var(--accent);}
+.mic-btn.recording{border-color:var(--red);color:var(--red);animation:pulse-red 1s infinite;}
+.mic-btn.wake-query{border-color:var(--purple);color:var(--purple);animation:pulse-purple 1s infinite;}
+@keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4);}50%{box-shadow:0 0 0 6px rgba(239,68,68,0);}}
+@keyframes pulse-purple{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,.4);}50%{box-shadow:0 0 0 6px rgba(168,85,247,0);}}
+.speak-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:2px 5px;border-radius:4px;transition:color .12s;margin-left:2px;vertical-align:middle;}
+.speak-btn:hover{color:var(--blue);}
+.speak-btn.active{color:var(--green);}
+.mode-badge{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;margin-bottom:10px;}
+.mode-badge.agent{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);color:var(--blue);}
+.mode-badge.mcp{background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.25);color:var(--purple);}
+.mode-badge.chat{background:rgba(249,115,22,.10);border:1px solid rgba(249,115,22,.25);color:var(--accent);}
+.tools-used-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;align-items:center;}
+.tools-used-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-right:3px;}
+.tool-chip{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px;}
+.tool-chip.chat{background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);color:var(--accent);}
+.tool-chip.agent{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:var(--blue);}
+.tool-chip.mcp{background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);color:var(--purple);}
+.steps-panel{margin-top:10px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.steps-panel-hdr{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);cursor:pointer;user-select:none;transition:color .12s;background:rgba(255,255,255,.02);}
+.steps-panel-hdr:hover{color:var(--text);}
+.steps-panel-body{display:none;}
+.steps-panel-body.open{display:block;}
+.step-row{padding:9px 12px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;font-size:11px;}
+.step-num{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;}
+.step-num.chat{background:rgba(249,115,22,.15);color:var(--accent);}
+.step-num.agent{background:rgba(59,130,246,.15);color:var(--blue);}
+.step-num.mcp{background:rgba(168,85,247,.15);color:var(--purple);}
+.step-content{flex:1;min-width:0;}
+.step-tool-name{font-weight:700;margin-bottom:2px;}
+.step-tool-name.chat{color:var(--accent);}
+.step-tool-name.agent{color:var(--blue);}
+.step-tool-name.mcp{color:var(--purple);}
+.step-input{color:var(--muted);font-size:10px;margin-bottom:4px;word-break:break-all;}
+.step-obs{color:var(--text);white-space:pre-wrap;max-height:100px;overflow-y:auto;line-height:1.5;background:rgba(255,255,255,.02);border-radius:4px;padding:4px 8px;border:1px solid var(--border);font-size:10.5px;}
+.status-banner{grid-column:1/-1;z-index:5;display:none;align-items:center;gap:8px;padding:7px 16px;font-size:11px;border-bottom:1px solid;}
+.status-banner.visible{display:flex;}
+.status-banner.wake{background:rgba(168,85,247,.08);border-color:rgba(168,85,247,.2);color:var(--purple);}
+.status-banner.query{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);color:var(--red);}
+.banner-pulse{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.status-banner.wake .banner-pulse{background:var(--purple);animation:pulse-wake 1s infinite;}
+.status-banner.query .banner-pulse{background:var(--red);animation:pulse-red 1s infinite;}
 </style>
 </head>
 <body>
 
-<!-- ── Interactive Graph Modal ── -->
 <div id="graphModal">
   <div class="graph-modal-box">
     <div class="graph-modal-hdr">
@@ -376,16 +243,24 @@ html, body { height: 100%; background: var(--bg); color: var(--text);
 </div>
 
 <div class="shell">
-
-  <!-- Topbar -->
   <header class="topbar">
-    <div class="logo">code<span>intel</span></div>
+    <div class="logo">code<span class="logo-bracket">[</span>intel<span class="logo-bracket">]</span></div>
     <div class="topbar-sep"></div>
     <div class="pill" id="llmPill"><div class="dot"></div><span id="llmLabel">checking…</span></div>
     <div class="pill" id="repoPill"><div class="dot"></div><span id="repoLabel">no repo</span></div>
+    <div class="wake-toggle" id="wakeToggle" onclick="toggleWakeWord()" title='Say "code intel" to activate mic'>
+      <div class="wake-dot"></div>
+      <span id="wakeLabel">wake word</span>
+    </div>
   </header>
 
-  <!-- Sessions sidebar -->
+  <div class="status-banner wake" id="statusBanner">
+    <div class="banner-pulse"></div>
+    <span id="bannerText">Wake word active — say <strong>"code intel"</strong> then your question</span>
+    <span style="margin-left:auto;font-size:10px;opacity:.7;font-style:italic;max-width:300px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis" id="bannerLive"></span>
+    <span style="opacity:.5;font-size:10px;flex-shrink:0" id="bannerSub">Listening…</span>
+  </div>
+
   <aside class="sessions">
     <div class="sessions-top">
       <button class="new-chat-btn" onclick="newChat()">＋ New Chat</button>
@@ -395,7 +270,6 @@ html, body { height: 100%; background: var(--bg); color: var(--text);
     </div>
   </aside>
 
-  <!-- Repo sidebar -->
   <aside class="sidebar">
     <div class="s-section">
       <div class="s-label">Local Repository</div>
@@ -414,6 +288,19 @@ html, body { height: 100%; background: var(--bg); color: var(--text);
            ondragover="dragOver(event)" ondragleave="dragLeave()" ondrop="dropFile(event)">
         <input type="file" id="zipFile" accept=".zip" onchange="uploadZip(this.files[0])">
         📦 Drop .zip or click to upload
+      </div>
+    </div>
+    <div class="s-section collapsible">
+      <div class="s-label s-label-toggle" onclick="toggleSection('pasteBody','pasteCaret')">
+        Paste Code <span class="s-label-caret" id="pasteCaret">▶</span>
+      </div>
+      <div class="s-section-body collapsed" id="pasteBody">
+        <textarea class="paste-textarea" id="pasteCode" placeholder="Paste your code here…"></textarea>
+        <div class="paste-row">
+          <input class="paste-filename" id="pasteFilename" placeholder="filename.py" value="snippet.py">
+          <button class="paste-submit" onclick="submitPasteCode()">Analyse</button>
+        </div>
+        <div class="paste-hint">Supports .py, .js, .ts, .java, .cpp</div>
       </div>
     </div>
     <div class="s-section">
@@ -437,26 +324,29 @@ html, body { height: 100%; background: var(--bg); color: var(--text);
     </div>
   </aside>
 
-  <!-- Main -->
   <main class="main">
     <div class="tabs">
-      <div class="tab active" onclick="switchTab('chat', this)">💬 Chat</div>
-      <div class="tab" onclick="switchTab('vuln', this)">🛡️ Security Scan</div>
+      <div class="tab active" onclick="switchTab('chat',this)">💬 Chat</div>
+      <div class="tab" onclick="switchTab('vuln',this)">🛡️ Security Scan</div>
     </div>
-
-    <!-- Chat panel -->
     <div class="tab-panel active" id="tab-chat">
       <div class="messages" id="messages">
         <div class="welcome" id="welcome">
           <div class="welcome-icon">⬡</div>
           <h2>Codebase Intelligence</h2>
-          <p>Load a repo, then ask questions. Each conversation is saved automatically.</p>
+          <p>Load a repo, then ask questions in any mode. Conversations are saved automatically.</p>
+          <div class="welcome-modes">
+            <span class="welcome-mode chat">💬 Chat — fast semantic search</span>
+            <span class="welcome-mode agent">🤖 Agent — multi-tool reasoning</span>
+            <span class="welcome-mode mcp">⚡ MCP — protocol-native agent</span>
+          </div>
         </div>
       </div>
       <div class="input-bar">
         <div class="mode-toggle">
-          <button class="mode-btn active" id="modeChatBtn" onclick="setMode('chat')">💬 Chat</button>
-          <button class="mode-btn" id="modeAgentBtn" onclick="setMode('agent')">🤖 Agent</button>
+          <button class="mode-btn active-chat" id="modeChatBtn"  onclick="setMode('chat')">💬 Chat</button>
+          <button class="mode-btn"             id="modeAgentBtn" onclick="setMode('agent')">🤖 Agent</button>
+          <button class="mode-btn"             id="modeMcpBtn"   onclick="setMode('mcp')">⚡ MCP</button>
         </div>
         <div class="input-wrap">
           <span class="input-prompt">&gt;_</span>
@@ -467,669 +357,545 @@ html, body { height: 100%; background: var(--bg); color: var(--text);
         <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Voice input">🎙️</button>
       </div>
     </div>
-
-    <!-- Vuln panel -->
     <div class="tab-panel" id="tab-vuln">
       <div class="vuln-panel">
         <div class="scan-row">
           <button class="scan-btn" onclick="runScan()">🔍 Run Security Scan</button>
-          <button class="export-btn" onclick="exportReport()">📄 Export PDF Report</button>
+          <button class="export-btn" onclick="exportReport()">📄 Export HTML Report</button>
         </div>
-        <div id="vulnResults" style="color:var(--muted);font-size:12px">
-          Load a repository and click "Run Security Scan".
-        </div>
+        <div id="vulnResults" style="color:var(--muted);font-size:12px">Load a repository and click "Run Security Scan".</div>
       </div>
     </div>
-
   </main>
 </div>
 
 <script>
-const API       = 'http://localhost:8000';
-const STORE_KEY = 'codeintel_chats';
+const API='http://localhost:8000', STORE_KEY='codeintel_chats';
+let currentChatId=null,history=[],displayMessages=[],currentRepo='',_lastQuery='',_agentMode='chat',_userScrolled=false;
 
-let currentChatId   = null;
-let history         = [];
-let displayMessages = [];
-let currentRepo     = '';
-let _lastQuery      = '';   // used for interactive graph
-let _agentMode      = false; // ← agent mode toggle
-
-// ── Mode switching ─────────────────────────────────────────────────────────────
-function setMode(mode) {
-  _agentMode = mode === 'agent';
-  document.getElementById('modeChatBtn').classList.toggle('active', !_agentMode);
-  document.getElementById('modeAgentBtn').classList.toggle('active', _agentMode);
-  document.getElementById('queryInput').placeholder = _agentMode
-    ? 'Agent mode: ask multi-step questions…'
-    : 'Ask about your codebase…';
+function setMode(mode){
+  _agentMode=mode;
+  document.getElementById('modeChatBtn').className='mode-btn'+(mode==='chat'?' active-chat':'');
+  document.getElementById('modeAgentBtn').className='mode-btn'+(mode==='agent'?' active-agent':'');
+  document.getElementById('modeMcpBtn').className='mode-btn'+(mode==='mcp'?' active-mcp':'');
+  const ph={chat:'Ask about your codebase…',agent:'Agent mode: multi-step reasoning…',mcp:'MCP mode: protocol-native agent…'};
+  document.getElementById('queryInput').placeholder=ph[mode];
 }
-
-// ── Persistence ────────────────────────────────────────────────────────────────
-function loadAllChats() {
-  try { return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); }
-  catch { return []; }
+function toggleSection(bodyId,caretId){
+  const body=document.getElementById(bodyId),caret=document.getElementById(caretId);
+  const open=body.classList.toggle('collapsed'); caret.classList.toggle('open',!open);
 }
-function saveAllChats(chats) {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(chats)); }
-  catch {
-    chats.forEach(c => c.messages.forEach(m => { if (m.graph) m.graph = null; }));
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(chats)); } catch {}
+function loadAllChats(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'[]');}catch{return[];}}
+function saveAllChats(chats){
+  try{localStorage.setItem(STORE_KEY,JSON.stringify(chats));}
+  catch{chats.forEach(c=>c.messages.forEach(m=>{if(m.graph)m.graph=null;}));try{localStorage.setItem(STORE_KEY,JSON.stringify(chats));}catch{}}
+}
+function saveCurrentChat(){
+  if(!currentChatId||displayMessages.length===0)return;
+  const all=loadAllChats(),idx=all.findIndex(c=>c.id===currentChatId);
+  const chat={id:currentChatId,title:displayMessages.find(m=>m.type==='user')?.text?.slice(0,40)||'New chat',mode:_agentMode,repo:currentRepo,history,messages:displayMessages,createdAt:idx>=0?all[idx].createdAt:Date.now(),updatedAt:Date.now()};
+  if(idx>=0)all[idx]=chat;else all.unshift(chat);
+  saveAllChats(all);renderSessionsList();
+}
+function renderSessionsList(){
+  const list=document.getElementById('sessionsList'),all=loadAllChats();
+  if(!all.length){list.innerHTML='<div class="sessions-empty">No chats yet.<br>Start by loading a repo.</div>';return;}
+  const todayStart=new Date();todayStart.setHours(0,0,0,0);
+  const yestStart=new Date(todayStart);yestStart.setDate(yestStart.getDate()-1);
+  const groups={Today:[],Yesterday:[],Older:[]};
+  all.forEach(c=>{if(c.updatedAt>=todayStart.getTime())groups.Today.push(c);else if(c.updatedAt>=yestStart.getTime())groups.Yesterday.push(c);else groups.Older.push(c);});
+  let html='';
+  for(const[label,chats]of Object.entries(groups)){
+    if(!chats.length)continue;
+    html+=`<div class="session-group-label">${label}</div>`;
+    chats.forEach(c=>{const active=c.id===currentChatId?'active':'',mc=c.mode==='agent'?'agent':c.mode==='mcp'?'mcp':'';
+      html+=`<div class="session-item ${active}" onclick="switchChat('${c.id}')"><div class="s-mode-dot ${mc}"></div><div class="s-title" title="${esc(c.title)}">${esc(c.title)}</div><button class="del-btn" onclick="deleteChat(event,'${c.id}')">×</button></div>`;});
   }
+  list.innerHTML=html;
 }
-function saveCurrentChat() {
-  if (!currentChatId || displayMessages.length === 0) return;
-  const all  = loadAllChats();
-  const idx  = all.findIndex(c => c.id === currentChatId);
-  const chat = {
-    id: currentChatId,
-    title: displayMessages.find(m => m.type === 'user')?.text?.slice(0, 40) || 'New chat',
-    repo: currentRepo, history, messages: displayMessages,
-    createdAt: idx >= 0 ? all[idx].createdAt : Date.now(),
-    updatedAt: Date.now(),
-  };
-  if (idx >= 0) all[idx] = chat; else all.unshift(chat);
-  saveAllChats(all);
-  renderSessionsList();
+function newChat(){saveCurrentChat();currentChatId='chat_'+Date.now();history=[];displayMessages=[];document.getElementById('messages').innerHTML='';document.getElementById('messages').appendChild(buildWelcome());renderSessionsList();}
+function switchChat(id){
+  if(id===currentChatId)return;saveCurrentChat();
+  const all=loadAllChats(),chat=all.find(c=>c.id===id);if(!chat)return;
+  currentChatId=chat.id;history=chat.history||[];displayMessages=chat.messages||[];currentRepo=chat.repo||'';
+  if(chat.mode)setMode(chat.mode);
+  const container=document.getElementById('messages');container.innerHTML='';
+  if(!displayMessages.length)container.appendChild(buildWelcome());
+  else{hideWelcome();displayMessages.forEach(m=>{
+    if(m.type==='user')renderUserMsg(m.text);
+    else if(m.type==='agent')renderAgentMsg(m.text,m.toolsUsed,m.steps,null,false);
+    else if(m.type==='mcp')renderMcpMsg(m.text,m.toolsUsed,m.steps,null,false);
+    else renderBotMsg(m.text,m.results,m.callers,m.graph,m.query,false);
+  });}
+  renderSessionsList();scrollBot();
 }
+function deleteChat(e,id){e.stopPropagation();const all=loadAllChats().filter(c=>c.id!==id);saveAllChats(all);if(id===currentChatId)newChat();else renderSessionsList();}
 
-// ── Sessions UI ────────────────────────────────────────────────────────────────
-function renderSessionsList() {
-  const list = document.getElementById('sessionsList');
-  const all  = loadAllChats();
-  if (!all.length) {
-    list.innerHTML = '<div class="sessions-empty">No chats yet.<br>Start by loading a repo.</div>';
-    return;
-  }
-  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
-  const yestStart  = new Date(todayStart); yestStart.setDate(yestStart.getDate()-1);
-  const groups = { Today: [], Yesterday: [], Older: [] };
-  all.forEach(c => {
-    if (c.updatedAt >= todayStart.getTime())      groups.Today.push(c);
-    else if (c.updatedAt >= yestStart.getTime())  groups.Yesterday.push(c);
-    else                                           groups.Older.push(c);
-  });
-  let html = '';
-  for (const [label, chats] of Object.entries(groups)) {
-    if (!chats.length) continue;
-    html += `<div class="session-group-label">${label}</div>`;
-    chats.forEach(c => {
-      const active = c.id === currentChatId ? 'active' : '';
-      html += `<div class="session-item ${active}" onclick="switchChat('${c.id}')">
-        <div class="s-title" title="${esc(c.title)}">${esc(c.title)}</div>
-        <button class="del-btn" onclick="deleteChat(event,'${c.id}')">×</button>
-      </div>`;
-    });
-  }
-  list.innerHTML = html;
+async function checkHealth(){
+  try{const d=await(await fetch(`${API}/health`)).json();
+    const pill=document.getElementById('llmPill'),lbl=document.getElementById('llmLabel');
+    if(d.llm){pill.classList.add('ok');lbl.textContent='Ollama ✓';}else lbl.textContent='No LLM';
+    if(d.repo)updateRepoUI(d.repo,d.functions,d.files);}catch{}
 }
-
-function newChat() {
-  saveCurrentChat();
-  currentChatId = 'chat_' + Date.now();
-  history = []; displayMessages = [];
-  document.getElementById('messages').innerHTML = '';
-  document.getElementById('messages').appendChild(buildWelcome());
-  renderSessionsList();
-}
-
-function switchChat(id) {
-  if (id === currentChatId) return;
-  saveCurrentChat();
-  const all  = loadAllChats();
-  const chat = all.find(c => c.id === id);
-  if (!chat) return;
-  currentChatId = chat.id; history = chat.history || [];
-  displayMessages = chat.messages || []; currentRepo = chat.repo || '';
-  const container = document.getElementById('messages');
-  container.innerHTML = '';
-  if (!displayMessages.length) { container.appendChild(buildWelcome()); }
-  else {
-    hideWelcome();
-    displayMessages.forEach(m => {
-      if (m.type === 'user')       renderUserMsg(m.text);
-      else if (m.type === 'agent') renderAgentMsg(m.text, m.toolsUsed, m.steps, null, false);
-      else                         renderBotMsg(m.text, m.results, m.callers, m.graph, m.query, false);
-    });
-  }
-  renderSessionsList(); scrollBot();
-}
-
-function deleteChat(e, id) {
-  e.stopPropagation();
-  const all = loadAllChats().filter(c => c.id !== id);
-  saveAllChats(all);
-  if (id === currentChatId) newChat(); else renderSessionsList();
-}
-
-// ── Health ─────────────────────────────────────────────────────────────────────
-async function checkHealth() {
-  try {
-    const d = await (await fetch(`${API}/health`)).json();
-    const pill = document.getElementById('llmPill');
-    const lbl  = document.getElementById('llmLabel');
-    if (d.llm) { pill.classList.add('ok'); lbl.textContent = 'Ollama'; }
-    else        { lbl.textContent = 'No LLM'; }
-    if (d.repo) updateRepoUI(d.repo, d.functions, d.files);
-  } catch {}
-}
-
-function updateRepoUI(repo, fn, files) {
+function updateRepoUI(repo,fn,files){
   document.getElementById('repoPill').classList.add('ok');
-  document.getElementById('repoLabel').textContent = repo.split(/[\\/]/).pop().slice(0,18);
-  document.getElementById('sFunctions').textContent = fn;
-  document.getElementById('sFiles').textContent     = files;
-  currentRepo = repo;
+  document.getElementById('repoLabel').textContent=repo.split(/[\\/]/).pop().slice(0,18);
+  document.getElementById('sFunctions').textContent=fn;
+  document.getElementById('sFiles').textContent=files;
+  currentRepo=repo;
+}
+function switchTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');document.getElementById('tab-'+name).classList.add('active');
+}
+async function loadLocal(){const p=document.getElementById('repoInput').value.trim();if(!p)return;await loadRepo('/load',{repo_path:p},`Loaded: ${p}`);}
+async function cloneRepo(){
+  const url=document.getElementById('githubInput').value.trim();if(!url)return;
+  const btn=document.getElementById('cloneBtn');btn.disabled=true;btn.textContent='Cloning…';
+  await loadRepo('/clone',{github_url:url},`Cloned: ${url.split('/').pop()}`);
+  btn.disabled=false;btn.textContent='Clone & Analyse';
+}
+async function loadRepo(endpoint,body,msg){
+  try{const r=await fetch(API+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(r.ok){updateRepoUI(d.repo||body.repo_path||'',d.functions,d.files);hideWelcome();addBotMessage(msg+` — <b>${d.functions}</b> functions, <b>${d.files}</b> files.`,null,null,null,'',false);history=[];}
+    else addBotMessage(`❌ ${d.detail}`,null,null,null,'',false);
+  }catch{addBotMessage('Cannot reach API. Run: <code>uvicorn api:app --reload</code>',null,null,null,'',false);}
+}
+async function uploadZip(file){
+  if(!file)return;hideWelcome();const tipId=appendTypingEl();
+  const fd=new FormData();fd.append('file',file);
+  try{const r=await fetch(`${API}/upload`,{method:'POST',body:fd});const d=await r.json();removeTyping(tipId);
+    if(r.ok){updateRepoUI(d.repo||file.name,d.functions,d.files);addBotMessage(`Uploaded <b>${file.name}</b> — <b>${d.functions}</b> functions.`,null,null,null,'',false);history=[];}
+    else addBotMessage(`❌ ${d.detail}`,null,null,null,'',false);
+  }catch{removeTyping(tipId);addBotMessage('Upload failed.',null,null,null,'',false);}
+}
+function dragOver(e){e.preventDefault();document.getElementById('dropZone').classList.add('drag');}
+function dragLeave(){document.getElementById('dropZone').classList.remove('drag');}
+function dropFile(e){e.preventDefault();dragLeave();uploadZip(e.dataTransfer.files[0]);}
+async function submitPasteCode(){
+  const code=document.getElementById('pasteCode').value.trim(),filename=document.getElementById('pasteFilename').value.trim()||'snippet.py';
+  if(!code){alert('Paste some code first.');return;}
+  hideWelcome();const tipId=appendTypingEl();
+  const blob=new Blob([code],{type:'text/plain'}),file=new File([blob],filename,{type:'text/plain'});
+  const fd=new FormData();fd.append('file',file);
+  try{const r=await fetch(`${API}/upload`,{method:'POST',body:fd});const d=await r.json();removeTyping(tipId);
+    if(r.ok){updateRepoUI(d.repo||filename,d.functions,d.files);addBotMessage(`Analysed pasted code <b>${filename}</b> — <b>${d.functions}</b> functions indexed.`,null,null,null,'',false);document.getElementById('pasteCode').value='';history=[];}
+    else addBotMessage(`❌ ${d.detail||'Upload failed.'}`,null,null,null,'',false);
+  }catch{removeTyping(tipId);addBotMessage('Cannot reach API.',null,null,null,'',false);}
 }
 
-// ── Tab switching ──────────────────────────────────────────────────────────────
-function switchTab(name, el) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('tab-' + name).classList.add('active');
+function fireQuery(q){document.getElementById('queryInput').value=q;sendQuery();}
+async function sendQuery(){
+  const input=document.getElementById('queryInput'),query=input.value.trim();
+  if(!query)return;input.value='';
+  if(!currentChatId)currentChatId='chat_'+Date.now();
+  _lastQuery=query;_userScrolled=false;hideWelcome();addUserMessage(query);
+  history.push({role:'user',content:query});
+  const tipId=appendTypingEl();document.getElementById('sendBtn').disabled=true;
+  if(_agentMode==='agent')await sendAgentQuery(query,tipId);
+  else if(_agentMode==='mcp')await sendMcpQuery(query,tipId);
+  else await sendChatQuery(query,tipId);
+  document.getElementById('sendBtn').disabled=false;input.focus();
+}
+async function sendChatQuery(query,tipId){
+  try{const r=await fetch(`${API}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query,history:history.slice(0,-1)})});
+    const d=await r.json();removeTyping(tipId);
+    if(r.ok){addBotMessage(d.answer,d.results,d.callers,d.graph,query,true);history.push({role:'assistant',content:d.answer});if(history.length>20)history=history.slice(-20);saveCurrentChat();}
+    else{addBotMessage(`❌ ${d.detail}`,null,null,null,'',false);history.pop();}
+  }catch{removeTyping(tipId);addBotMessage('Cannot reach API.',null,null,null,'',false);history.pop();}
+}
+async function sendAgentQuery(query,tipId){
+  try{const r=await fetch(`${API}/agent-chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query,history:history.slice(0,-1)})});
+    const d=await r.json();removeTyping(tipId);
+    if(r.ok){addAgentMessage(d.answer,d.tools_used||[],d.steps||[],d.error);history.push({role:'assistant',content:d.answer});if(history.length>20)history=history.slice(-20);saveCurrentChat();}
+    else{addBotMessage(`❌ ${d.detail||'Agent error'}`,null,null,null,'',false);history.pop();}
+  }catch{removeTyping(tipId);addBotMessage('Cannot reach API.',null,null,null,'',false);history.pop();}
+}
+async function sendMcpQuery(query,tipId){
+  try{const r=await fetch(`${API}/mcp-chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query,history:history.slice(0,-1)})});
+    const d=await r.json();removeTyping(tipId);
+    if(r.ok){addMcpMessage(d.answer,d.tools_used||[],d.steps||[],d.error);history.push({role:'assistant',content:d.answer});if(history.length>20)history=history.slice(-20);saveCurrentChat();}
+    else{addBotMessage(`❌ ${d.detail||'MCP error'}`,null,null,null,'',false);history.pop();}
+  }catch{removeTyping(tipId);addBotMessage('Cannot reach API.',null,null,null,'',false);history.pop();}
 }
 
-// ── Repo loading ───────────────────────────────────────────────────────────────
-async function loadLocal() {
-  const path = document.getElementById('repoInput').value.trim();
-  if (!path) return;
-  await loadRepo('/load', {repo_path: path}, `Loaded: ${path}`);
+function addUserMessage(text){displayMessages.push({type:'user',text});renderUserMsg(text);}
+function addBotMessage(text,results,callers,graph,query,animate){displayMessages.push({type:'bot',text,results,callers,graph,query});renderBotMsg(text,results,callers,graph,query,animate);}
+function addAgentMessage(answer,toolsUsed,steps,error){displayMessages.push({type:'agent',text:answer,toolsUsed,steps});renderAgentMsg(answer,toolsUsed,steps,error,true);}
+function addMcpMessage(answer,toolsUsed,steps,error){displayMessages.push({type:'mcp',text:answer,toolsUsed,steps});renderMcpMsg(answer,toolsUsed,steps,error,true);}
+
+function buildStepsHtml(steps,mode){
+  if(!steps||!steps.length)return'';
+  const rows=steps.map((s,i)=>`<div class="step-row"><div class="step-num ${mode}">${i+1}</div><div class="step-content"><div class="step-tool-name ${mode}">⚙ ${esc(s.tool)}</div>${s.input?`<div class="step-input">Input: ${esc(JSON.stringify(s.input))}</div>`:''} ${s.observation?`<div class="step-obs">${esc(s.observation)}</div>`:''}</div></div>`).join('');
+  const uid='steps-'+Date.now()+Math.random().toString(36).slice(2,6);
+  return`<div class="steps-panel"><div class="steps-panel-hdr" onclick="toggleSteps('${uid}')"><span>🔍 Execution Steps (${steps.length})</span><span id="stepsArrow-${uid}">▸</span></div><div class="steps-panel-body" id="${uid}">${rows}</div></div>`;
 }
-async function cloneRepo() {
-  const url = document.getElementById('githubInput').value.trim();
-  if (!url) return;
-  const btn = document.getElementById('cloneBtn');
-  btn.disabled = true; btn.textContent = 'Cloning…';
-  await loadRepo('/clone', {github_url: url}, `Cloned: ${url.split('/').pop()}`);
-  btn.disabled = false; btn.textContent = 'Clone & Analyse';
+function buildToolsHtml(toolsUsed,mode){
+  if(!toolsUsed||!toolsUsed.length)return'';
+  const chips=[...new Set(toolsUsed)].map(t=>`<span class="tool-chip ${mode}">⚙ ${esc(t)}</span>`).join('');
+  return`<div class="tools-used-row"><span class="tools-used-label">Tools</span>${chips}</div>`;
 }
-async function loadRepo(endpoint, body, msg) {
-  try {
-    const r = await fetch(API + endpoint, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(body),
-    });
-    const d = await r.json();
-    if (r.ok) {
-      updateRepoUI(d.repo || body.repo_path || '', d.functions, d.files);
-      hideWelcome();
-      addBotMessage(msg + ` — <b>${d.functions}</b> functions, <b>${d.files}</b> files.`, null, null, null, '', false);
-      history = [];
-    } else { addBotMessage(`❌ ${d.detail}`, null, null, null, '', false); }
-  } catch { addBotMessage('Cannot reach API. Run: <code>uvicorn api:app --reload</code>', null, null, null, '', false); }
+function renderUserMsg(text){
+  const el=document.createElement('div');el.className='msg user';
+  el.innerHTML=`<div class="msg-role">You</div><div class="bubble">${esc(text)}</div>`;
+  document.getElementById('messages').appendChild(el);scrollBot();
 }
-async function uploadZip(file) {
-  if (!file) return;
-  hideWelcome();
-  const tipId = appendTypingEl();
-  const fd = new FormData(); fd.append('file', file);
-  try {
-    const r = await fetch(`${API}/upload`, {method:'POST', body:fd});
-    const d = await r.json();
-    removeTyping(tipId);
-    if (r.ok) {
-      updateRepoUI(d.repo||file.name, d.functions, d.files);
-      addBotMessage(`Uploaded <b>${file.name}</b> — <b>${d.functions}</b> functions.`, null, null, null, '', false);
-      history = [];
-    } else { addBotMessage(`❌ ${d.detail}`, null, null, null, '', false); }
-  } catch { removeTyping(tipId); addBotMessage('Upload failed.', null, null, null, '', false); }
-}
-function dragOver(e) { e.preventDefault(); document.getElementById('dropZone').classList.add('drag'); }
-function dragLeave()  { document.getElementById('dropZone').classList.remove('drag'); }
-function dropFile(e)  { e.preventDefault(); dragLeave(); uploadZip(e.dataTransfer.files[0]); }
-
-// ── Chat ───────────────────────────────────────────────────────────────────────
-function fireQuery(q) { document.getElementById('queryInput').value = q; sendQuery(); }
-
-async function sendQuery() {
-  const input = document.getElementById('queryInput');
-  const query = input.value.trim();
-  if (!query) return;
-  input.value = '';
-  if (!currentChatId) { currentChatId = 'chat_' + Date.now(); }
-
-  _lastQuery = query;
-  _userScrolled = false;
-  hideWelcome();
-  addUserMessage(query);
-  history.push({role:'user', content:query});
-
-  const tipId = appendTypingEl();
-  document.getElementById('sendBtn').disabled = true;
-
-  if (_agentMode) {
-    await sendAgentQuery(query, tipId);
-  } else {
-    await sendChatQuery(query, tipId);
-  }
-
-  document.getElementById('sendBtn').disabled = false;
-  input.focus();
-}
-
-async function sendChatQuery(query, tipId) {
-  try {
-    const r = await fetch(`${API}/chat`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({query, history: history.slice(0,-1)}),
-    });
-    const d = await r.json();
-    removeTyping(tipId);
-    if (r.ok) {
-      addBotMessage(d.answer, d.results, d.callers, d.graph, query, true);
-      history.push({role:'assistant', content:d.answer});
-      if (history.length > 20) history = history.slice(-20);
-      saveCurrentChat();
-    } else {
-      addBotMessage(`❌ ${d.detail}`, null, null, null, '', false);
-      history.pop();
-    }
-  } catch {
-    removeTyping(tipId);
-    addBotMessage('Cannot reach API.', null, null, null, '', false);
-    history.pop();
-  }
-}
-
-async function sendAgentQuery(query, tipId) {
-  try {
-    const r = await fetch(`${API}/agent-chat`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({query, history: history.slice(0,-1)}),
-    });
-    const d = await r.json();
-    removeTyping(tipId);
-    if (r.ok) {
-      addAgentMessage(d.answer, d.tools_used || [], d.steps || [], d.error);
-      history.push({role:'assistant', content:d.answer});
-      if (history.length > 20) history = history.slice(-20);
-      saveCurrentChat();
-    } else {
-      addBotMessage(`❌ ${d.detail || 'Agent error'}`, null, null, null, '', false);
-      history.pop();
-    }
-  } catch {
-    removeTyping(tipId);
-    addBotMessage('Cannot reach API.', null, null, null, '', false);
-    history.pop();
-  }
-}
-
-// ── Message renderers ──────────────────────────────────────────────────────────
-function addUserMessage(text) {
-  displayMessages.push({type:'user', text});
-  renderUserMsg(text);
-}
-function addBotMessage(text, results, callers, graph, query, animate) {
-  displayMessages.push({type:'bot', text, results, callers, graph, query});
-  renderBotMsg(text, results, callers, graph, query, animate);
-}
-
-function addAgentMessage(answer, toolsUsed, steps, error) {
-  displayMessages.push({type:'agent', text: answer, toolsUsed, steps});
-  renderAgentMsg(answer, toolsUsed, steps, error, true);
-}
-
-function renderAgentMsg(answer, toolsUsed, steps, error, animate) {
-  const el = document.createElement('div');
-  el.className = 'msg bot';
-
-  // Tools used chips
-  const toolChips = (toolsUsed || []).map(t =>
-    `<span class="agent-tool-chip">⚙ ${esc(t)}</span>`
-  ).join('');
-
-  // Steps accordion
-  let stepsHtml = '';
-  if (steps && steps.length) {
-    const stepRows = steps.map((s, i) => `
-      <div class="agent-step">
-        <div class="agent-step-tool">⚙ ${esc(s.tool)}</div>
-        <div class="agent-step-input">Input: ${esc(JSON.stringify(s.input))}</div>
-        <div class="agent-step-obs">${esc(s.observation)}</div>
-      </div>`).join('');
-    const stepsId = 'steps-' + Date.now();
-    stepsHtml = `<div class="agent-steps">
-      <div class="agent-steps-hdr" onclick="toggleSteps('${stepsId}')">
-        <span>🔍 Agent Steps (${steps.length})</span>
-        <span id="stepsArrow-${stepsId}">▸</span>
-      </div>
-      <div class="agent-steps-body" id="${stepsId}">${stepRows}</div>
-    </div>`;
-  }
-
-  const answerId = 'answer-' + Date.now();
-  el.innerHTML = `
-    <div class="msg-role">Agent
-      <button class="speak-btn" data-msg-id="${answerId}" onclick="speakById(this)">🔊</button>
-    </div>
-    <div class="bubble">
-      <div class="agent-badge">🤖 Agent Mode</div>
-      ${toolChips ? `<div class="agent-tools">${toolChips}</div>` : ''}
-      <span class="answer-text" id="${answerId}"></span>
-      ${stepsHtml}
-    </div>`;
-
+function renderBotMsg(text,results,callers,graph,query,animate){
+  const el=document.createElement('div');el.className='msg bot';
+  const toolsUsed=results&&results.length?['search_codebase']:[];
+  const steps=results&&results.length?results.slice(0,3).map(r=>({tool:'search_codebase',input:query,observation:`${r.name}() in ${r.file} (line ${r.line||'?'})`})):[];
+  let chipsHtml='';
+  if(results&&results.length)chipsHtml='<div class="chips">'+results.slice(0,5).map(r=>`<div class="chip"><span class="fn">${esc(r.name)}()</span><span class="fi">${esc(r.file)}</span>${r.line?`<span style="color:var(--muted)">:${r.line}</span>`:''}</div>`).join('')+'</div>';
+  let callersHtml='';
+  if(callers&&callers.length)callersHtml=`<div class="callers">Called by: ${callers.map(c=>`<span>${esc(c.function)}()</span> in ${esc(c.file)}`).join(' · ')}</div>`;
+  let codeHtml='';
+  if(results&&results[0]&&results[0].code){const r=results[0],lang=guessLang(r.file),hl=hljs.highlight(r.code,{language:lang,ignoreIllegals:true}).value;codeHtml=`<div class="code-block"><div class="code-hdr"><span class="code-lang">${lang} · ${esc(r.name)}()</span></div><pre class="code-body"><code class="hljs language-${lang}">${hl}</code></pre></div>`;}
+  let graphHtml='';
+  if(graph){const eq=encodeURIComponent(query||'');graphHtml=`<div class="graph-wrap"><div class="graph-hdr"><span>Function Call Graph</span><button class="graph-btn" onclick="openGraphModal('${eq}')">🔀 Interactive</button></div><img src="data:image/png;base64,${graph}" alt="call graph"></div>`;}
+  const msgId='msg-'+Date.now();
+  el.innerHTML=`<div class="msg-role">CodeIntel <button class="speak-btn" data-msg-id="${msgId}" onclick="speakById(this)">🔊</button></div><div class="bubble" id="${msgId}"><div class="mode-badge chat">💬 Chat</div>${buildToolsHtml(toolsUsed,'chat')}<span class="answer-text"></span>${chipsHtml}${callersHtml}${codeHtml}${graphHtml}${buildStepsHtml(steps,'chat')}</div>`;
   document.getElementById('messages').appendChild(el);
-
-  const answerSpan = el.querySelector('.answer-text');
-  if (animate && answer) {
-    typewriter(answerSpan, answer);
-  } else {
-    answerSpan.innerHTML = answer || (error ? `❌ ${error}` : 'No answer.');
-  }
-
+  const span=el.querySelector('.answer-text');
+  if(animate&&text)typewriter(span,text);else span.innerHTML=text;
   scrollBot();
 }
-
-function toggleSteps(id) {
-  const body  = document.getElementById(id);
-  const arrow = document.getElementById('stepsArrow-' + id);
-  if (!body) return;
-  const open = body.classList.toggle('open');
-  if (arrow) arrow.textContent = open ? '▾' : '▸';
-}
-
-function renderUserMsg(text) {
-  const el = document.createElement('div');
-  el.className = 'msg user';
-  el.innerHTML = `<div class="msg-role">You</div><div class="bubble">${esc(text)}</div>`;
+function renderAgentMsg(answer,toolsUsed,steps,error,animate){
+  const el=document.createElement('div');el.className='msg bot agent-msg';
+  const msgId='answer-'+Date.now();
+  el.innerHTML=`<div class="msg-role">Agent <button class="speak-btn" data-msg-id="${msgId}" onclick="speakById(this)">🔊</button></div><div class="bubble"><div class="mode-badge agent">🤖 Agent Mode</div>${buildToolsHtml(toolsUsed,'agent')}<span class="answer-text" id="${msgId}"></span>${buildStepsHtml(steps,'agent')}</div>`;
   document.getElementById('messages').appendChild(el);
+  const span=el.querySelector('.answer-text');
+  if(animate&&answer)typewriter(span,answer);else span.innerHTML=answer||(error?`❌ ${error}`:'No answer.');
   scrollBot();
 }
-
-function renderBotMsg(text, results, callers, graph, query, animate) {
-  const el  = document.createElement('div');
-  el.className = 'msg bot';
-
-  // ── Chips (top results) ────────────────────────────────────────────────────
-  let chipsHtml = '';
-  if (results && results.length) {
-    chipsHtml = '<div class="chips">' +
-      results.slice(0,5).map(r =>
-        `<div class="chip">
-          <span class="fn">${esc(r.name)}()</span>
-          <span class="fi">${esc(r.file)}</span>
-          ${r.line ? `<span style="color:var(--muted)">:${r.line}</span>` : ''}
-        </div>`
-      ).join('') + '</div>';
-  }
-
-  // ── Callers ────────────────────────────────────────────────────────────────
-  let callersHtml = '';
-  if (callers && callers.length) {
-    callersHtml = `<div class="callers">Called by: ${
-      callers.map(c => `<span>${esc(c.function)}()</span> in ${esc(c.file)}`).join(' · ')
-    }</div>`;
-  }
-
-  // ── Code block ────────────────────────────────────────────────────────────
-  let codeHtml = '';
-  if (results && results[0] && results[0].code) {
-    const r    = results[0];
-    const lang = guessLang(r.file);
-    const hl   = hljs.highlight(r.code, {language:lang, ignoreIllegals:true}).value;
-    codeHtml = `<div class="code-block">
-      <div class="code-hdr"><span class="code-lang">${lang} · ${esc(r.name)}()</span></div>
-      <pre class="code-body"><code class="hljs language-${lang}">${hl}</code></pre>
-    </div>`;
-  }
-
-  // ── Static graph ──────────────────────────────────────────────────────────
-  let graphHtml = '';
-  if (graph) {
-    const encodedQuery = encodeURIComponent(query || '');
-    graphHtml = `<div class="graph-wrap">
-      <div class="graph-hdr">
-        <span>Function Call Graph</span>
-        <button class="graph-btn" onclick="openGraphModal('${encodedQuery}')">🔀 Interactive</button>
-      </div>
-      <img src="data:image/png;base64,${graph}" alt="call graph">
-    </div>`;
-  }
-
-  const msgId = 'msg-' + Date.now();
-
-  el.innerHTML = `<div class="msg-role">CodeIntel
-    <button class="speak-btn" data-msg-id="${msgId}" onclick="speakById(this)">🔊</button>
-  </div>
-  <div class="bubble" id="${msgId}">
-    <span class="answer-text"></span>${chipsHtml}${callersHtml}${codeHtml}${graphHtml}
-  </div>`;
-
+function renderMcpMsg(answer,toolsUsed,steps,error,animate){
+  const el=document.createElement('div');el.className='msg bot mcp-msg';
+  const msgId='mcp-'+Date.now();
+  el.innerHTML=`<div class="msg-role">MCP Agent <button class="speak-btn" data-msg-id="${msgId}" onclick="speakById(this)">🔊</button></div><div class="bubble"><div class="mode-badge mcp">⚡ MCP Mode</div>${buildToolsHtml(toolsUsed,'mcp')}<span class="answer-text" id="${msgId}"></span>${buildStepsHtml(steps,'mcp')}</div>`;
   document.getElementById('messages').appendChild(el);
-
-  // ── Typewriter effect ──────────────────────────────────────────────────────
-  const answerSpan = el.querySelector('.answer-text');
-  if (animate && text) {
-    typewriter(answerSpan, text);
-  } else {
-    answerSpan.innerHTML = text;
-  }
-
+  const span=el.querySelector('.answer-text');
+  if(animate&&answer)typewriter(span,answer);else span.innerHTML=answer||(error?`❌ ${error}`:'No answer.');
   scrollBot();
 }
-
-// ── Typewriter animation ───────────────────────────────────────────────────────
-function typewriter(element, text, speed = 6) {
-  // Add cursor
-  const cursor = document.createElement('span');
-  cursor.className = 'typewriter-cursor';
-  element.parentNode.insertBefore(cursor, element.nextSibling);
-
-  let i = 0;
-  // Use innerHTML to preserve any bold/code in the text
-  const plain = text.replace(/<[^>]+>/g, '');  // strip tags for char-by-char
-  const hasHTML = plain.length !== text.length;
-
-  if (hasHTML) {
-    // If text has HTML, set it all at once then animate opacity
-    element.innerHTML = text;
-    element.style.opacity = '0';
-    setTimeout(() => {
-      element.style.transition = 'opacity 0.4s';
-      element.style.opacity    = '1';
-      cursor.remove();
-      scrollBot(); // scroll once after fade-in
-    }, 50);
-    return;
-  }
-
-  function tick() {
-    if (i <= text.length) {
-      element.textContent = text.slice(0, i);
-      i++;
-      // No scrollBot() here — avoids fighting user scroll mid-animation
-      setTimeout(tick, speed);
-    } else {
-      cursor.remove();
-      scrollBot(); // scroll once when animation finishes
-    }
-  }
+function toggleSteps(id){const body=document.getElementById(id),arrow=document.getElementById('stepsArrow-'+id);if(!body)return;const open=body.classList.toggle('open');if(arrow)arrow.textContent=open?'▾':'▸';}
+function typewriter(element,text,speed=6){
+  const cursor=document.createElement('span');cursor.className='typewriter-cursor';
+  element.parentNode.insertBefore(cursor,element.nextSibling);
+  const plain=text.replace(/<[^>]+>/g,''),hasHTML=plain.length!==text.length;
+  if(hasHTML){element.innerHTML=text;element.style.opacity='0';setTimeout(()=>{element.style.transition='opacity 0.4s';element.style.opacity='1';cursor.remove();scrollBot();},50);return;}
+  let i=0;
+  function tick(){if(i<=text.length){element.textContent=text.slice(0,i++);setTimeout(tick,speed);}else{cursor.remove();scrollBot();}}
   tick();
 }
-
-// ── Smart scroll — respects user scroll intent ─────────────────────────────────
-let _userScrolled = false;
-
-document.getElementById('messages').addEventListener('scroll', function () {
-  const m = this;
-  // If user has scrolled more than 60px from the bottom, stop auto-scrolling
-  _userScrolled = m.scrollHeight - m.scrollTop - m.clientHeight > 60;
-});
-
-function scrollBot() {
-  if (_userScrolled) return;
-  const m = document.getElementById('messages');
-  requestAnimationFrame(() => { m.scrollTop = m.scrollHeight; });
+document.getElementById('messages').addEventListener('scroll',function(){_userScrolled=this.scrollHeight-this.scrollTop-this.clientHeight>60;});
+function scrollBot(){if(_userScrolled)return;const m=document.getElementById('messages');requestAnimationFrame(()=>{m.scrollTop=m.scrollHeight;});}
+function openGraphModal(eq){document.getElementById('graphFrame').src=`${API}/graph/interactive?query=${decodeURIComponent(eq)}`;document.getElementById('graphModal').classList.add('open');}
+function closeGraphModal(){document.getElementById('graphModal').classList.remove('open');document.getElementById('graphFrame').src='about:blank';}
+document.getElementById('graphModal').addEventListener('click',function(e){if(e.target===this)closeGraphModal();});
+let _tc=0;
+function appendTypingEl(){
+  const id='tip-'+(++_tc),el=document.createElement('div');el.className='msg bot';el.id=id;
+  const lbl={chat:'CodeIntel',agent:'Agent',mcp:'MCP Agent'}[_agentMode]||'CodeIntel';
+  el.innerHTML=`<div class="msg-role">${lbl}</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  document.getElementById('messages').appendChild(el);scrollBot();return id;
 }
-
-// ── Interactive graph modal ────────────────────────────────────────────────────
-function openGraphModal(encodedQuery) {
-  const query = decodeURIComponent(encodedQuery);
-  const frame = document.getElementById('graphFrame');
-  frame.src   = `${API}/graph/interactive?query=${encodeURIComponent(query)}`;
-  document.getElementById('graphModal').classList.add('open');
+function removeTyping(id){const el=document.getElementById(id);if(el)el.remove();}
+async function runScan(){
+  const el=document.getElementById('vulnResults');el.innerHTML='<div style="color:var(--muted)">Scanning…</div>';
+  try{const r=await fetch(`${API}/vulnerabilities`),d=await r.json();
+    if(!r.ok){el.innerHTML=`<div style="color:var(--red)">${d.detail}</div>`;return;}
+    const colors={CRITICAL:'#ef4444',HIGH:'#f97316',MEDIUM:'#eab308',LOW:'#3b82f6'},s=d.summary;
+    let html=`<div class="vuln-summary">${['CRITICAL','HIGH','MEDIUM','LOW'].map(sv=>`<div class="vuln-stat"><div class="n" style="color:${colors[sv]}">${s[sv]||0}</div><div class="l">${sv}</div></div>`).join('')}</div>`;
+    if(!d.findings.length)html+='<div class="vuln-empty">✅ No vulnerabilities detected.</div>';
+    else d.findings.forEach(f=>{const src=f.source==='bandit'?'🔍 Bandit':'📝 Regex';html+=`<div class="vuln-item"><span class="vuln-badge" style="background:${f.color}">${f.severity}</span><div class="vuln-info"><div class="vuln-fn"><code>${esc(f.function)}()</code> · <span style="color:var(--muted)">line ${f.line}</span></div><div class="vuln-file">${esc(f.file)}</div><div class="vuln-desc">${esc(f.description)}</div>${f.snippet?`<div class="vuln-code">→ ${esc(f.snippet)}</div>`:''}<div class="vuln-src">${src}</div></div></div>`;});
+    el.innerHTML=html;
+  }catch{el.innerHTML='<div style="color:var(--red)">API not reachable.</div>';}
 }
-
-function closeGraphModal() {
-  document.getElementById('graphModal').classList.remove('open');
-  document.getElementById('graphFrame').src = 'about:blank';
-}
-
-// Close modal on backdrop click
-document.getElementById('graphModal').addEventListener('click', function(e) {
-  if (e.target === this) closeGraphModal();
-});
-
-// ── Typing indicator ───────────────────────────────────────────────────────────
-let _tc = 0;
-function appendTypingEl() {
-  const id = 'tip-' + (++_tc);
-  const el = document.createElement('div');
-  el.className = 'msg bot'; el.id = id;
-  el.innerHTML = `<div class="msg-role">CodeIntel</div>
-    <div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
-  document.getElementById('messages').appendChild(el); scrollBot();
-  return id;
-}
-function removeTyping(id) { const el=document.getElementById(id); if(el)el.remove(); }
-
-// ── Vulnerability scan ─────────────────────────────────────────────────────────
-async function runScan() {
-  const el = document.getElementById('vulnResults');
-  el.innerHTML = '<div style="color:var(--muted)">Scanning…</div>';
-  try {
-    const r = await fetch(`${API}/vulnerabilities`);
-    const d = await r.json();
-    if (!r.ok) { el.innerHTML=`<div style="color:var(--red)">${d.detail}</div>`; return; }
-    const colors = {CRITICAL:'#ef4444', HIGH:'#f97316', MEDIUM:'#eab308', LOW:'#3b82f6'};
-    const s = d.summary;
-    let html = `<div class="vuln-summary">
-      ${['CRITICAL','HIGH','MEDIUM','LOW'].map(sv =>
-        `<div class="vuln-stat">
-          <div class="n" style="color:${colors[sv]}">${s[sv]||0}</div>
-          <div class="l">${sv}</div>
-        </div>`).join('')}
-    </div>`;
-    if (!d.findings.length) {
-      html += '<div class="vuln-empty">✅ No vulnerabilities detected.</div>';
-    } else {
-      d.findings.forEach(f => {
-        const src = f.source === 'bandit' ? '🔍 Bandit' : '📝 Regex';
-        html += `<div class="vuln-item">
-          <span class="vuln-badge" style="background:${f.color}">${f.severity}</span>
-          <div class="vuln-info">
-            <div class="vuln-fn"><code>${esc(f.function)}()</code> · <span style="color:var(--muted)">line ${f.line}</span></div>
-            <div class="vuln-file">${esc(f.file)}</div>
-            <div class="vuln-desc">${esc(f.description)}</div>
-            ${f.snippet?`<div class="vuln-code">→ ${esc(f.snippet)}</div>`:''}
-            <div class="vuln-src">${src}</div>
-          </div>
-        </div>`;
-      });
-    }
-    el.innerHTML = html;
-  } catch { el.innerHTML='<div style="color:var(--red)">API not reachable.</div>'; }
-}
-
-function exportReport() { window.open(`${API}/export`, '_blank'); }
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-function buildWelcome() {
-  const d = document.createElement('div');
-  d.className='welcome'; d.id='welcome';
-  d.innerHTML=`<div class="welcome-icon">⬡</div><h2>Codebase Intelligence</h2>
-    <p>Load a repo, then ask questions. Each conversation is saved automatically.</p>`;
+function exportReport(){window.open(`${API}/export`,'_blank');}
+function buildWelcome(){
+  const d=document.createElement('div');d.className='welcome';d.id='welcome';
+  d.innerHTML=`<div class="welcome-icon">⬡</div><h2>Codebase Intelligence</h2><p>Load a repo, then ask questions. Each conversation is saved automatically.</p><div class="welcome-modes"><span class="welcome-mode chat">💬 Chat — fast search</span><span class="welcome-mode agent">🤖 Agent — multi-tool</span><span class="welcome-mode mcp">⚡ MCP — protocol-native</span></div>`;
   return d;
 }
-function hideWelcome() { const w=document.getElementById('welcome'); if(w)w.remove(); }
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function guessLang(f) {
-  if (!f) return 'text';
-  if (f.endsWith('.py'))   return 'python';
-  if (f.endsWith('.java')) return 'java';
-  if (f.endsWith('.js'))   return 'javascript';
-  if (f.endsWith('.ts'))   return 'typescript';
-  if (f.endsWith('.cpp'))  return 'cpp';
-  return 'text';
-}
+function hideWelcome(){const w=document.getElementById('welcome');if(w)w.remove();}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function guessLang(f){if(!f)return'text';if(f.endsWith('.py'))return'python';if(f.endsWith('.java'))return'java';if(f.endsWith('.js'))return'javascript';if(f.endsWith('.ts'))return'typescript';if(f.endsWith('.cpp'))return'cpp';return'text';}
 
-// ── Text-to-speech ─────────────────────────────────────────────────────────────
-let _currentUtterance = null;
-let _activeSpeakBtn   = null;
-window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+// ── TTS ──────────────────────────────────────────────────────────────────────
+let _activeSpeakBtn=null;
+window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
 window.speechSynthesis.getVoices();
-
-function speakById(btn) {
-  const msgId  = btn.getAttribute('data-msg-id');
-  const bubble = document.getElementById(msgId);
-  if (!bubble) return;
-  speakText(btn, bubble.innerText || bubble.textContent || '');
-}
-
-function speakText(btn, text) {
-  if (_activeSpeakBtn === btn && window.speechSynthesis.speaking) {
-    window.speechSynthesis.cancel();
-    btn.textContent = '🔊'; btn.classList.remove('active');
-    _activeSpeakBtn = null; return;
-  }
+function speakById(btn){const id=btn.getAttribute('data-msg-id'),b=document.getElementById(id);if(!b)return;speakText(btn,b.innerText||b.textContent||'');}
+function speakText(btn,text){
+  if(_activeSpeakBtn===btn&&window.speechSynthesis.speaking){window.speechSynthesis.cancel();btn.textContent='🔊';btn.classList.remove('active');_activeSpeakBtn=null;return;}
   window.speechSynthesis.cancel();
-  if (_activeSpeakBtn) { _activeSpeakBtn.textContent='🔊'; _activeSpeakBtn.classList.remove('active'); }
-
-  const clean = text.replace(/\*\*(.*?)\*\*/g,'$1').replace(/`([^`]+)`/g,'$1')
-    .replace(/\s+/g,' ').trim().slice(0,1500);
-  if (!clean) return;
-
-  const utterance  = new SpeechSynthesisUtterance(clean);
-  utterance.rate   = 0.92; utterance.pitch = 1; utterance.volume = 1;
-  const voices = window.speechSynthesis.getVoices();
-  const eng    = voices.find(v => v.lang.startsWith('en') && v.localService);
-  if (eng) utterance.voice = eng;
-  utterance.onend  = () => { btn.textContent='🔊'; btn.classList.remove('active'); _activeSpeakBtn=null; };
-  utterance.onerror= () => { btn.textContent='🔊'; btn.classList.remove('active'); _activeSpeakBtn=null; };
-  btn.textContent = '⏹️'; btn.classList.add('active'); _activeSpeakBtn = btn;
-  setTimeout(() => window.speechSynthesis.speak(utterance), 100);
+  if(_activeSpeakBtn){_activeSpeakBtn.textContent='🔊';_activeSpeakBtn.classList.remove('active');}
+  const clean=text.replace(/\*\*(.*?)\*\*/g,'$1').replace(/`([^`]+)`/g,'$1').replace(/\s+/g,' ').trim().slice(0,1500);
+  if(!clean)return;
+  const u=new SpeechSynthesisUtterance(clean);u.rate=0.92;u.pitch=1;u.volume=1;
+  const v=window.speechSynthesis.getVoices(),eng=v.find(x=>x.lang.startsWith('en')&&x.localService);
+  if(eng)u.voice=eng;
+  u.onend=()=>{btn.textContent='🔊';btn.classList.remove('active');_activeSpeakBtn=null;};
+  u.onerror=()=>{btn.textContent='🔊';btn.classList.remove('active');_activeSpeakBtn=null;};
+  btn.textContent='⏹️';btn.classList.add('active');_activeSpeakBtn=btn;
+  setTimeout(()=>window.speechSynthesis.speak(u),100);
 }
 
-// ── Voice input ────────────────────────────────────────────────────────────────
-let _mediaRecorder = null;
-let _audioChunks   = [];
-let _micActive     = false;
-
-async function toggleMic() {
-  const btn = document.getElementById('micBtn');
-  if (_micActive && _mediaRecorder) { _mediaRecorder.stop(); return; }
+// ── Manual mic ────────────────────────────────────────────────────────────────
+let _mediaRecorder=null,_audioChunks=[],_micActive=false;
+async function toggleMic(){
+  const btn=document.getElementById('micBtn');
+  if(_micActive&&_mediaRecorder){_mediaRecorder.stop();return;}
   let stream;
-  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
-  catch { alert('Microphone access denied.'); return; }
-
-  _audioChunks = []; _mediaRecorder = new MediaRecorder(stream);
-  _mediaRecorder.ondataavailable = e => { if(e.data.size>0) _audioChunks.push(e.data); };
-  _mediaRecorder.onstop = async () => {
-    stream.getTracks().forEach(t => t.stop());
-    btn.textContent = '⏳'; btn.title = 'Transcribing…';
-    const blob = new Blob(_audioChunks, {type:'audio/webm'});
-    const fd   = new FormData(); fd.append('audio', blob, 'audio.webm');
-    try {
-      const r = await fetch(`${API}/transcribe`, {method:'POST', body:fd});
-      const d = await r.json();
-      if (d.transcript) { document.getElementById('queryInput').value = d.transcript; }
-      else if (d.detail) { alert(`Transcription error: ${d.detail}`); }
-    } catch { alert('Transcription failed.'); }
-    _micActive = false; btn.textContent='🎙️'; btn.classList.remove('active'); btn.title='Voice input';
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:true});}
+  catch{alert('Microphone access denied.');return;}
+  _audioChunks=[];_mediaRecorder=new MediaRecorder(stream);
+  _mediaRecorder.ondataavailable=e=>{if(e.data.size>0)_audioChunks.push(e.data);};
+  _mediaRecorder.onstop=async()=>{
+    stream.getTracks().forEach(t=>t.stop());
+    btn.textContent='⏳';btn.title='Transcribing…';
+    const blob=new Blob(_audioChunks,{type:'audio/webm'}),fd=new FormData();
+    fd.append('audio',blob,'audio.webm');
+    try{const r=await fetch(`${API}/transcribe`,{method:'POST',body:fd}),d=await r.json();
+      if(d.transcript)document.getElementById('queryInput').value=d.transcript;
+      else if(d.detail)alert(`Transcription error: ${d.detail}`);
+    }catch{alert('Transcription failed.');}
+    _micActive=false;btn.textContent='🎙️';btn.classList.remove('recording');btn.title='Voice input';
   };
-  _mediaRecorder.start(); _micActive = true;
-  btn.classList.add('active'); btn.title='Recording… click to stop';
+  _mediaRecorder.start();_micActive=true;
+  btn.classList.add('recording');btn.title='Recording… click to stop';
 }
 
-// ── Init ───────────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════
+//  WAKE WORD — MediaRecorder + /transcribe (same pipeline as manual mic)
+//
+//  WHY THIS APPROACH?
+//  The old SpeechRecognition-based wake word was browser-specific, fragile
+//  across accents, and produced different transcript quality than the manual
+//  mic's /transcribe pipeline. This version uses a single consistent STT path:
+//
+//    MediaRecorder (short chunk) → POST /transcribe → check for wake phrase
+//
+//  Two-phase async loop:
+//    Phase 1 (WAKE)  — record WAKE_CHUNK_MS of audio, transcribe, scan for
+//                      wake phrase. Loop until found.
+//    Phase 2 (QUERY) — once wake phrase confirmed, record QUERY_CHUNK_MS of
+//                      audio, transcribe, fire as query. Loop back to Phase 1.
+//
+//  Same-breath support: if the wake phrase and query are in the same chunk
+//  (e.g. "code intel where is auth"), strip the wake phrase and fire inline.
+//
+//  Stopping: set _wakeActive = false. The loop checks the flag between every
+//  async step, so it exits cleanly after the in-flight chunk finishes.
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── Tuning constants ─────────────────────────────────────────────────────────
+const WAKE_CHUNK_MS  = 2500;  // duration of each wake-detection window (ms)
+const QUERY_CHUNK_MS = 4000;  // how long to listen for the query after wake
+
+// ── State ────────────────────────────────────────────────────────────────────
+let _wakeActive = false;
+let _wakePhase  = 'idle';  // 'idle' | 'wake' | 'query'
+
+// ── Known phrasings of "code intel" ──────────────────────────────────────────
+// Includes original variants + what THIS Whisper instance actually transcribes
+// (captured from console: "word intel", "Corinthal", "Indale", etc.)
+const WAKE_PHRASES = [
+  // canonical
+  'code intel',     'codeintel',      'code in tell',   'code and tell',
+  'co intel',       'coat intel',     'cold intel',     'code until',
+  'could intel',    'code enter',     'code intell',    'code in tel',
+  'code intensity', 'codeintell',     'code intel,',    'cody intel',
+  'coat and tell',  'code n tell',    'coded tell',     'code intell,',
+  // observed from THIS Whisper model (add more as you discover them)
+  'word intel',     'corinthal',      'indale',         'core intel',
+  'court intel',    'cord intel',     'go intel',       'ko intel',
+  'code and tell',  'code intel.',    'code intel!',    'cold and tell',
+  'could and tell', 'coat and tell',  'code intel:',    'code intl',
+  'code intol',     'co-intel',       'code-intel',     'quote intel',
+  // hello / hi — removed from junk so these can trigger the wake word
+  'hello',          'hello.',         'hello!',         'hi',
+  'hi.',            'hi!',            'hey',            'hey.',
+];
+
+function _matchWake(text) {
+  const t = text.toLowerCase();
+  return WAKE_PHRASES.some(p => t.includes(p));
+}
+
+function _stripWake(text) {
+  const t = text.toLowerCase();
+  for (const p of WAKE_PHRASES) {
+    const i = t.indexOf(p);
+    if (i !== -1) return text.slice(i + p.length).trim();
+  }
+  return text.trim();
+}
+
+// ── Core: record a fixed-length audio chunk and return its Blob ───────────────
+// Returns null if the mic is unavailable or wake was disabled mid-recording.
+function _recordChunk(durationMs) {
+  return new Promise(async (resolve) => {
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch {
+      resolve(null);  // mic denied or hardware error
+      return;
+    }
+
+    const chunks = [];
+    const rec    = new MediaRecorder(stream);
+    rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    rec.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      resolve(new Blob(chunks, { type: 'audio/webm' }));
+    };
+
+    rec.start();
+    // Stop after durationMs — if wake was toggled off we still let this
+    // chunk finish naturally; the loop's flag check handles early exit.
+    setTimeout(() => { if (rec.state !== 'inactive') rec.stop(); }, durationMs);
+  });
+}
+
+// ── Core: send a Blob to /transcribe and return the transcript string ─────────
+// Forces English to prevent Whisper picking Tamil/other languages on short clips.
+// Filters known silence-hallucinations Whisper emits when there's no speech.
+const _WHISPER_JUNK = new Set([
+  '','.',',','...','thank you','thank you.','thanks','thanks.','you','you.',
+  'bye','bye.','okay','okay.','ok','ok.','um','uh','hmm','hm',
+  'please','please.','yes','no',
+  // NOTE: 'hi' and 'hello' removed — they are wake phrases, not junk
+]);
+async function _transcribeBlob(blob) {
+  const fd = new FormData();
+  fd.append('audio', blob, 'audio.webm');
+  fd.append('language', 'en');   // force English — eliminates Tamil/auto-detect confusion
+  try {
+    const r = await fetch(`${API}/transcribe`, { method: 'POST', body: fd });
+    const d = await r.json();
+    const t = (d.transcript || '').trim();
+    if (_WHISPER_JUNK.has(t.toLowerCase())) return '';   // swallow hallucination
+    return t;
+  } catch {
+    return '';  // network or API error — treat as silence
+  }
+}
+
+// ── Main loop ─────────────────────────────────────────────────────────────────
+async function _wakeLoop() {
+  while (_wakeActive) {
+
+    // ── Phase 1: hunt for the wake word ───────────────────────────────────
+    _wakePhase = 'wake';
+    _bannerWake();
+
+    const wakeBlob = await _recordChunk(WAKE_CHUNK_MS);
+
+    if (!_wakeActive) break;          // toggled off while recording
+    if (!wakeBlob) {
+      // Mic unavailable — disable feature gracefully
+      alert('Microphone unavailable. Wake word disabled.');
+      toggleWakeWord();
+      break;
+    }
+
+    const wakeText = await _transcribeBlob(wakeBlob);
+    if (wakeText) _bannerLive(wakeText);
+
+    if (!_matchWake(wakeText)) continue;  // no wake phrase — loop
+
+    // Same-breath query: "code intel where is authentication"
+    const inline = _stripWake(wakeText);
+    if (inline.length > 2) {
+      _doFireQuery(inline);
+      // Small gap so sendQuery() can start before mic reopens
+      await new Promise(r => setTimeout(r, 1200));
+      continue;
+    }
+
+    // ── Phase 2: wake confirmed — record the query ─────────────────────────
+    _wakePhase = 'query';
+    _bannerQuery();
+
+    const queryBlob = await _recordChunk(QUERY_CHUNK_MS);
+
+    if (!_wakeActive) break;
+    if (!queryBlob) { continue; }  // mic blip — loop back to wake phase
+
+    const queryText = await _transcribeBlob(queryBlob);
+    _bannerLive(queryText);
+
+    if (queryText.length > 1) {
+      _doFireQuery(queryText);
+      await new Promise(r => setTimeout(r, 1200));
+    }
+    // If queryText is empty (silence/noise) just loop back to Phase 1
+  }
+
+  // Ensure UI is clean if we exit the loop for any reason
+  _wakePhase = 'idle';
+}
+
+// ── Fire a query and update the banner/input field ────────────────────────────
+function _doFireQuery(query) {
+  document.getElementById('queryInput').value = query;
+  sendQuery();
+}
+
+// ── Banner helpers (unchanged API from old implementation) ────────────────────
+function _bannerLive(txt) {
+  const el = document.getElementById('bannerLive');
+  if (el) el.textContent = txt ? `"${txt}"` : '';
+}
+function _bannerWake() {
+  const b = document.getElementById('statusBanner');
+  b.className = 'status-banner wake visible';
+  document.getElementById('bannerText').innerHTML = 'Say <strong>"code intel"</strong> then your question';
+  document.getElementById('bannerSub').textContent = 'Listening…';
+  document.getElementById('micBtn').classList.remove('wake-query');
+  _bannerLive('');
+}
+function _bannerQuery() {
+  const b = document.getElementById('statusBanner');
+  b.className = 'status-banner query visible';
+  document.getElementById('bannerText').innerHTML = '🎤 Wake word heard! Now say your question…';
+  document.getElementById('bannerSub').textContent = 'Listening for query…';
+  document.getElementById('micBtn').classList.add('wake-query');
+  _bannerLive('');
+}
+function _bannerHide() {
+  document.getElementById('statusBanner').classList.remove('visible');
+  document.getElementById('micBtn').classList.remove('wake-query');
+  _bannerLive('');
+}
+
+// ── Public toggle (topbar button) ─────────────────────────────────────────────
+function toggleWakeWord() {
+  _wakeActive = !_wakeActive;
+  const toggle = document.getElementById('wakeToggle');
+  const label  = document.getElementById('wakeLabel');
+
+  if (_wakeActive) {
+    toggle.classList.add('active');
+    label.textContent = 'listening…';
+    _wakeLoop();   // start the async loop; it runs until _wakeActive = false
+  } else {
+    _wakePhase = 'idle';
+    toggle.classList.remove('active');
+    label.textContent = 'wake word';
+    _bannerHide();
+    // _wakeLoop exits naturally after the current _recordChunk finishes
+    // (no explicit kill needed — the flag check handles it)
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
 checkHealth();
-currentChatId = 'chat_' + Date.now();
+currentChatId='chat_'+Date.now();
 renderSessionsList();
 </script>
 </body>
