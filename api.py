@@ -270,7 +270,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.include_router(agent_router)
-app.mount("/mcp", mcp.sse_app())
+# Mount MCP only if available
+if hasattr(mcp, "sse_app"):
+    app.mount("/mcp", mcp.sse_app())
 app.include_router(mcp_chat_router)
 
 app.add_middleware(
