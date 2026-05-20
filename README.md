@@ -1,3 +1,5 @@
+![Tests](https://github.com/AdithyaRaoK14/CodeIntel-RAG-Agentic-Codebase-Intelligence-Platform-with-MCP/actions/workflows/tests.yml/badge.svg)
+
 # CodeIntel-RAG — Agentic Codebase Intelligence Platform with MCP
 
 > **Ask questions about any codebase in plain English. Get precise answers, security audits, and dependency graphs — powered by hybrid RAG, a local LLM, a LangGraph ReAct agent, and a full MCP server — all running locally with no data leaving your machine.**
