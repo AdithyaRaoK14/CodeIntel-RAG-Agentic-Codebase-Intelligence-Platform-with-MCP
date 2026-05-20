@@ -345,6 +345,21 @@ All settings are in `config.py` and can be overridden via environment variables 
 | `CODEINTEL_API_URL` | `http://localhost:8000` | API base URL (standalone MCP mode) |
 
 ---
+## Test Coverage
+
+The test suite validates:
+
+- FastAPI endpoint behavior
+- Retrieval correctness
+- Cache consistency
+- Query parsing
+- Dependency graph analysis
+- Reranker quality
+- Repository loading safeguards
+- Path traversal protection
+- GitHub URL validation
+
+---
 
 ## Running the benchmark
 
